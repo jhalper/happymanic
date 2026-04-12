@@ -1,154 +1,369 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hero Builder — Roblox Character Designer</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#080c14; --surface:#0f1624; --surface2:#161f33; --border:#1e2d4a;
-    --accent:#00d4ff; --accent2:#ff6b35; --accent3:#7fff6b;
-    --text:#cfd8f0; --text-dim:#5a6a8a;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;min-height:100vh;}
-  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-  .app{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:32px 20px 80px;}
-  .badge{display:inline-block;background:linear-gradient(135deg,var(--accent2),#ff9a00);color:#000;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:2px;margin-bottom:14px;}
-  h1{font-family:'Orbitron',sans-serif;font-size:clamp(26px,6vw,42px);font-weight:900;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;line-height:1.1;}
-  .subtitle{color:var(--text-dim);font-size:14px;margin-bottom:32px;}
-  .prog-wrap{margin-bottom:10px;}
-  .prog-top{display:flex;justify-content:space-between;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px;}
-  .prog-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:16px;}
-  .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease;box-shadow:0 0 8px rgba(0,212,255,.5);}
-  .sec-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:32px;}
-  .sec-tab{flex:1;min-width:55px;padding:5px 6px;border:1px solid var(--border);border-radius:3px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.5px;color:var(--text-dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .2s;}
-  .sec-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);}
-  .sec-tab.done{border-color:var(--accent3);color:var(--accent3);background:rgba(127,255,107,.05);}
-  .q-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 26px;margin-bottom:16px;animation:slideUp .3s ease both;}
-  .q-sec{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;}
-  .q-label{font-size:18px;font-weight:600;color:#fff;margin-bottom:6px;line-height:1.4;}
-  .q-hint{font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;}
-  .q-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;padding:12px 16px;outline:none;transition:border-color .2s;}
-  .q-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,255,.1);}
-  .q-input::placeholder{color:var(--text-dim);}
-  .choices{display:flex;flex-wrap:wrap;gap:8px;}
-  .choice{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:7px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;transition:all .15s;user-select:none;}
-  .choice:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);}
-  .choice.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.13);}
-  .choice.sel-multi{border-color:var(--accent3);color:var(--accent3);background:rgba(127,255,107,.08);}
-  .multi-note{font-size:12px;color:var(--text-dim);margin-bottom:10px;}
-  .nav{display:flex;gap:10px;margin-top:20px;align-items:center;}
-  .btn-next{background:linear-gradient(135deg,var(--accent),#0077cc);border:none;border-radius:8px;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;padding:12px 24px;cursor:pointer;transition:all .2s;}
-  .btn-next:hover{transform:translateY(-1px);box-shadow:0 0 16px rgba(0,212,255,.4);}
-  .btn-back{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;padding:12px 20px;border-radius:8px;cursor:pointer;transition:all .2s;}
-  .btn-back:hover{border-color:var(--text-dim);color:var(--text);}
-  .skip-lnk{font-size:12px;color:var(--text-dim);margin-left:auto;cursor:pointer;padding:4px;}
-  .skip-lnk:hover{color:var(--text);}
-  .final-panel{background:var(--surface);border:1px solid var(--accent);border-radius:14px;overflow:hidden;box-shadow:0 0 40px rgba(0,212,255,.12);animation:slideUp .4s ease both;}
-  .final-tabs{display:flex;border-bottom:1px solid var(--border);}
-  .tab-btn{flex:1;background:transparent;border:none;color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;padding:14px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
-  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,212,255,.05);}
-  .tab-panel{padding:24px;display:none;}
-  .tab-panel.active{display:block;}
-  .sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  @media(max-width:480px){.sheet-grid{grid-template-columns:1fr;}}
-  .sheet-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
-  .sheet-card.full{grid-column:1/-1;}
-  .card-lbl{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent2);margin-bottom:5px;text-transform:uppercase;}
-  .card-val{color:var(--text);font-size:15px;line-height:1.5;}
-  .tag{display:inline-block;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);color:var(--accent);font-size:12px;padding:2px 9px;border-radius:3px;margin:2px 2px 2px 0;}
-  .tag.g{background:rgba(127,255,107,.1);border-color:rgba(127,255,107,.2);color:var(--accent3);}
-  .tag.o{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.2);color:var(--accent2);}
-  pre{background:#050810;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;font-size:12px;line-height:1.7;color:#7ecfff;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-word;}
-  .copy-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;margin-bottom:14px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
-  .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .copy-btn.ok{border-color:var(--accent3);color:var(--accent3);}
-  .restart-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;margin-left:10px;transition:all .2s;}
-  .restart-btn:hover{border-color:var(--accent2);color:var(--accent2);}
-  @keyframes slideUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-  ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-track{background:var(--bg);}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+[data-theme="light"] {
+  --bg:#eef2ff; --bg2:#e2e8f8; --surface:#fff; --surface2:#f4f6ff;
+  --border:#c8d3ee; --border-focus:#2563eb;
+  --accent:#2563eb; --accent-bg:#eff4ff;
+  --accent2:#d94f0a; --accent2-bg:#fff3ee;
+  --accent3:#15803d; --accent3-bg:#f0fdf4;
+  --text:#111827; --text-mid:#374151; --text-dim:#6b7280;
+  --shadow:0 2px 12px rgba(30,60,180,.08); --shadow-lg:0 4px 28px rgba(30,60,180,.13);
+  --btn-text:#fff;
+}
+[data-theme="dark"] {
+  --bg:#111827; --bg2:#1a2336; --surface:#1f2d40; --surface2:#263347;
+  --border:#3a4f6a; --border-focus:#60a5fa;
+  --accent:#60a5fa; --accent-bg:#1e3a5f;
+  --accent2:#fb923c; --accent2-bg:#3d200e;
+  --accent3:#34d399; --accent3-bg:#0d3327;
+  --text:#f1f5fb; --text-mid:#b0c0d8; --text-dim:#7890aa;
+  --shadow:0 2px 12px rgba(0,0,0,.5); --shadow-lg:0 4px 28px rgba(0,0,0,.6);
+  --btn-text:#0d1117;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:16px;line-height:1.55;min-height:100vh;transition:background .25s,color .25s;}
+.app{max-width:700px;margin:0 auto;padding:28px 20px 80px;}
+
+/* HEADER */
+.top-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;animation:fadeIn .4s ease both;}
+.badge{display:inline-block;background:var(--accent2);color:#fff;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:4px;margin-bottom:10px;}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(20px,5vw,34px);font-weight:900;color:var(--text);line-height:1.15;margin-bottom:5px;}
+h1 span{color:var(--accent);}
+.subtitle{color:var(--text-mid);font-size:14px;}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-mid);display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;margin-top:4px;transition:all .2s;box-shadow:var(--shadow);}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:10px;}
+.prog-top{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:6px;}
+.prog-bar{height:6px;background:var(--border);border-radius:10px;margin-bottom:14px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+
+/* SECTION TABS */
+.sec-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:24px;}
+.sec-tab{flex:1;min-width:48px;padding:5px 4px;border:1.5px solid var(--border);border-radius:6px;font-size:8px;font-weight:700;letter-spacing:.4px;color:var(--text-dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .2s;text-transform:uppercase;}
+.sec-tab.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+.sec-tab.done{border-color:var(--accent3);color:var(--accent3);background:var(--accent3-bg);}
+
+/* QUESTION CARD */
+.q-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:26px 22px;box-shadow:var(--shadow);animation:slideUp .3s ease both;}
+.q-sec{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:7px;}
+.q-label{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.35;}
+.q-hint{font-size:13px;color:var(--text-mid);margin-bottom:16px;background:var(--surface2);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;line-height:1.5;}
+
+/* INPUTS */
+.q-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;padding:12px 15px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.q-input:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.q-input::placeholder{color:var(--text-dim);}
+.q-textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;padding:12px 15px;outline:none;resize:vertical;min-height:90px;transition:border-color .2s,box-shadow .2s;line-height:1.5;}
+.q-textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.q-textarea::placeholder{color:var(--text-dim);}
+
+/* CHOICES */
+.choices{display:flex;flex-wrap:wrap;gap:8px;}
+.choice{background:var(--surface2);border:1.5px solid var(--border);color:var(--text-mid);padding:8px 16px;border-radius:50px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;transition:all .15s;user-select:none;}
+.choice:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+.choice.sel{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);font-weight:600;}
+.choice.sel-multi{border-color:var(--accent3);color:var(--accent3);background:var(--accent3-bg);font-weight:600;}
+.multi-note{font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* NAV */
+.nav{display:flex;gap:10px;margin-top:22px;align-items:center;flex-wrap:wrap;}
+.btn-next{background:var(--accent);border:none;border-radius:10px;color:var(--btn-text);font-family:'Inter',sans-serif;font-size:14px;font-weight:700;padding:12px 26px;cursor:pointer;transition:all .2s;}
+.btn-next:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,99,235,.3);}
+.btn-back{background:var(--surface2);border:1.5px solid var(--border);color:var(--text-mid);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:11px 18px;border-radius:10px;cursor:pointer;transition:all .2s;}
+.btn-back:hover{border-color:var(--text-mid);color:var(--text);}
+.skip-lnk{font-size:13px;color:var(--text-dim);margin-left:auto;cursor:pointer;padding:4px 8px;border-radius:6px;}
+.skip-lnk:hover{color:var(--text-mid);background:var(--surface2);}
+
+/* START SCREEN */
+.start-screen{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:32px 26px;box-shadow:var(--shadow-lg);animation:slideUp .4s ease both;}
+.start-screen h2{font-family:'Orbitron',sans-serif;font-size:20px;color:var(--text);margin-bottom:10px;}
+.start-screen p{color:var(--text-mid);font-size:14px;margin-bottom:24px;line-height:1.6;}
+.start-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:480px){.start-options{grid-template-columns:1fr;}}
+.start-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;}
+.start-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.start-card.example{border-color:var(--accent3);}
+.start-card.example:hover{border-color:var(--accent3);box-shadow:0 4px 20px rgba(21,128,61,.2);}
+.start-card-icon{font-size:28px;margin-bottom:10px;}
+.start-card h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.start-card p{font-size:13px;color:var(--text-mid);line-height:1.45;}
+.start-card .ex-name{display:inline-block;background:var(--accent3-bg);color:var(--accent3);border:1px solid var(--accent3);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px;letter-spacing:.5px;}
+
+/* FINAL PANEL */
+.final-panel{background:var(--surface);border:1.5px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);animation:slideUp .4s ease both;}
+.final-tabs{display:flex;border-bottom:1.5px solid var(--border);}
+.tab-btn{flex:1;background:transparent;border:none;color:var(--text-dim);font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:.3px;padding:14px 8px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;text-transform:uppercase;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-bg);}
+.tab-panel{padding:22px;display:none;}
+.tab-panel.active{display:block;}
+.complete-header{text-align:center;padding:18px 0 6px;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:var(--accent3);text-transform:uppercase;margin-bottom:18px;}
+
+/* SHEET GRID */
+.sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+@media(max-width:480px){.sheet-grid{grid-template-columns:1fr;}}
+.sheet-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 15px;}
+.sheet-card.full{grid-column:1/-1;}
+.card-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--accent2);margin-bottom:5px;text-transform:uppercase;}
+.card-val{color:var(--text);font-size:14px;line-height:1.5;font-weight:500;}
+.card-val small{color:var(--text-mid);font-size:12px;font-weight:400;display:block;margin-top:2px;}
+.stat-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.stat-pill{background:var(--bg);border:1px solid var(--border);color:var(--text-mid);font-size:11px;font-weight:600;padding:2px 9px;border-radius:50px;}
+.tag{display:inline-block;background:var(--accent-bg);border:1px solid var(--accent);color:var(--accent);font-size:12px;font-weight:600;padding:3px 10px;border-radius:50px;margin:2px 3px 2px 0;}
+.tag.g{background:var(--accent3-bg);border-color:var(--accent3);color:var(--accent3);}
+.tag.o{background:var(--accent2-bg);border-color:var(--accent2);color:var(--accent2);}
+
+/* SECTION DIVIDER IN SHEET */
+.sheet-section-title{grid-column:1/-1;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;padding:8px 0 2px;border-bottom:1px solid var(--border);margin-top:4px;}
+
+/* JSON */
+pre{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:18px;overflow-x:auto;font-size:11.5px;line-height:1.7;color:var(--accent);font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-word;}
+.copy-btn{background:var(--surface2);border:1.5px solid var(--border);color:var(--text-mid);padding:9px 18px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;margin-bottom:14px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+.copy-btn.ok{border-color:var(--accent3);color:var(--accent3);background:var(--accent3-bg);}
+.restart-btn{background:transparent;border:1.5px solid var(--border);color:var(--text-dim);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;margin-left:8px;transition:all .2s;}
+.restart-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div style="animation:slideUp .5s ease both">
-    <div class="badge">🎮 Roblox Hero Builder</div>
-    <h1>Design Your Hero</h1>
-    <p class="subtitle">Answer each question to build your character — then grab the final output.</p>
+  <div class="top-bar">
+    <div>
+      <div class="badge">🎮 Roblox Hero Builder</div>
+      <h1>Design Your <span>Hero</span></h1>
+      <p class="subtitle">Build a complete character sheet, one step at a time.</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
   </div>
+
   <div class="prog-wrap">
-    <div class="prog-top"><span id="secLabel">Section 1 of 8 — Identity</span><span id="pctLabel">0%</span></div>
+    <div class="prog-top"><span id="secLabel">Getting Started</span><span id="pctLabel">0%</span></div>
     <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
   </div>
+
   <div class="sec-tabs" id="secTabs">
     <div class="sec-tab active">Identity</div>
-    <div class="sec-tab">Combat</div>
+    <div class="sec-tab">Stats</div>
+    <div class="sec-tab">Primary</div>
+    <div class="sec-tab">Secondary</div>
     <div class="sec-tab">Passive</div>
     <div class="sec-tab">Ability 1</div>
     <div class="sec-tab">Ability 2</div>
     <div class="sec-tab">Ultimate</div>
     <div class="sec-tab">Strengths</div>
-    <div class="sec-tab">Review</div>
   </div>
+
+  <div id="startArea"></div>
   <div id="questionArea"></div>
   <div id="finalArea"></div>
 </div>
 
 <script>
+// ─── THEME ───────────────────────────────────────────────────────
+let theme = localStorage.getItem('hb-theme') || 'light';
+applyTheme(theme);
+function applyTheme(t){theme=t;document.documentElement.setAttribute('data-theme',t);document.getElementById('themeBtn').textContent=t==='light'?'🌙 Dark':'☀️ Light';localStorage.setItem('hb-theme',t);}
+function toggleTheme(){applyTheme(theme==='light'?'dark':'light');}
+
+// ─── ZARRAH EXAMPLE DATA ─────────────────────────────────────────
+const ZARRAH = {
+  name:'Zarrah',
+  theme:'Other',
+  themeCustom:'Electric Tracker',
+  role:'Damage / DPS',
+  teamFunction:'Info pressure + mobility poke damage',
+  coreIdea:'Mobile tracker who reveals enemies and punishes bad positioning',
+  playStyle:'Fast|Aggressive|Precise',
+  health:'225 HP',
+  moveSpeed:'16 studs/sec',
+  hitboxSize:'Medium',
+  difficulty:'Easy → Medium',
+  roleBonus:'+10% ultimate charge gain from eliminations',
+  primaryName:'Pulse Carbine',
+  primaryFiringMode:'Hitscan — 3-round burst',
+  primaryDamage:'22 per bullet · 66 per burst (bodyshots) · 99 per burst (all headshots)',
+  primaryFireRate:'2.3 bursts per second',
+  primaryMagSize:'24 bursts (72 bullets total)',
+  primaryReload:'1.6 seconds',
+  primaryRange:'Full damage: 0–35 studs · Falloff begins at 35 studs · Minimum damage: 70% at long range',
+  primaryHeadshot:'×1.5',
+  secondaryType:'Signature ability',
+  secondaryName:'Pulse Scan',
+  secondaryEffect:'Cone scan that reveals enemies through walls in a 70° forward cone',
+  secondaryStats:'70° cone width · 45 stud range · 1.75 sec reveal · 0.15 sec cast time · 10 sec cooldown',
+  secondaryTeamEffect:'Revealed enemies are visible to all teammates',
+  secondaryBonusEffect:'Revealed enemies take +10% damage from Zarrah only',
+  passiveName:'Combat Flow',
+  passiveEffect:'Landing damage reduces cooldown timers automatically',
+  passiveScaling:'Every 132 damage dealt reduces all cooldowns by 1 second',
+  passiveExcludes:'Does not affect ultimate charge rate',
+  ab1Name:'Vector Dash',
+  ab1Effect:'Quick lateral reposition dash left, right, or forward based on movement input',
+  ab1Stats:'16 stud distance · Instant burst movement (0.18 sec travel) · 1 charge',
+  ab1BonusEffect:'Grants 20% damage resistance during the dash',
+  ab1Purpose:'Movement',
+  ab1CD:'Short — 5 to 8 seconds',
+  ab1Charges:'1',
+  ab2Name:'Static Trap',
+  ab2Effect:'Throw a deployable electric proximity device that damages and slows nearby enemies',
+  ab2Stats:'20 stud throw distance · 0.6 sec activation delay · 8 stud trigger radius · 45 burst damage · 30% movement slow for 2 sec · 18 sec lifetime',
+  ab2Purpose:'Crowd control',
+  ab2CD:'Medium — 9 to 14 seconds',
+  ab2MaxActive:'1',
+  ultName:'Arc Breaker',
+  ultEffect:'Charge up and fire a piercing electric beam that travels through every enemy in a line',
+  ultStats:'0.7 sec charge · 4 stud beam width · 120 stud range · 180 damage per enemy hit · Pierces unlimited enemies',
+  ultExtraEffects:'Enemies hit are revealed for 2 sec and slowed 25% for 1.5 sec',
+  ultCost:'2100 ult charge',
+  ultPurpose:'Big damage',
+  ultExciting:'Pierces the entire enemy team if lined up right — massive outplay potential in a single shot',
+  strengths:'Winning 1v1 fights|Moving fast|Escaping danger',
+  weaknesses:'Bad in open spaces|Weak when abilities are on cooldown',
+  targetPlayer:'Players who like speed, tracking enemies, and outplaying with smart positioning'
+};
+
+// ─── QUESTIONS ───────────────────────────────────────────────────
+const SEC = ['Identity','Hero Stats','Primary Weapon','Secondary','Passive','Ability 1','Ability 2','Ultimate','Strengths'];
+
 const Q = [
-  {id:'name',sec:'Identity',si:0,label:"What is this character's name?",hint:'Pick anything — a cool word, nickname, or title.',ph:'e.g. Volt, Rook, Cinder, Patch',type:'text'},
-  {id:'theme',sec:'Identity',si:0,label:'What is the character supposed to be?',hint:'Their look or backstory.',type:'choice',ch:['Robot','Ninja','Medic','Cowboy','Alien','Heavy Soldier','Mage','Other'],custom:true},
-  {id:'role',sec:'Identity',si:0,label:'What is the main role?',hint:'How do they help the team?',type:'choice',ch:['Damage','Tank','Support','Hybrid']},
-  {id:'coreIdea',sec:'Identity',si:0,label:'What is the ONE thing that makes this character special?',hint:'Keep it to one clear idea.',ph:'e.g. Very fast, hard to kill, heals teammates',type:'text'},
-  {id:'playStyle',sec:'Identity',si:0,label:'How should this character feel to play?',hint:'Pick 2 or 3.',type:'multi',ch:['Fast','Heavy','Aggressive','Smart','Sneaky','Protective','Precise','Chaotic']},
-  {id:'primaryName',sec:'Core Combat',si:1,label:'What is the primary weapon?',type:'choice',ch:['Rifle','Shotgun','Sword','Bow','Blaster','Magic Attack','Sniper','Other'],custom:true},
-  {id:'primaryRange',sec:'Core Combat',si:1,label:'What range does it work best at?',type:'choice',ch:['Short range','Medium range','Long range']},
-  {id:'primaryFire',sec:'Core Combat',si:1,label:'How does it fire?',type:'choice',ch:['Hits instantly (hitscan)','Fires projectiles','Slow but strong shots','Fast fire rate','Charged shot']},
-  {id:'hasSecondary',sec:'Core Combat',si:1,label:'Does this character need a secondary weapon?',hint:'Not every hero needs one.',type:'choice',ch:['Yes','No']},
-  {id:'secondaryName',sec:'Core Combat',si:1,label:'What is the secondary weapon?',hint:'When should the player use it?',ph:'e.g. Backup pistol, close-range knife, healing gadget',type:'text',skipIf:{id:'hasSecondary',val:'No'}},
-  {id:'passiveName',sec:'Passive',si:2,label:'What is the passive ability called?',hint:'A passive works automatically — always on.',ph:'e.g. Adrenaline, Iron Skin, Ghost Step',type:'text'},
-  {id:'passiveEffect',sec:'Passive',si:2,label:'What does the passive do?',hint:'One automatic effect.',ph:'e.g. Moves faster at low health, slowly heals over time',type:'text'},
-  {id:'ab1Name',sec:'Ability 1',si:3,label:'What is Ability 1 called?',ph:'e.g. Dash, Shield Wall, Flash Grenade',type:'text'},
-  {id:'ab1Effect',sec:'Ability 1',si:3,label:'What does Ability 1 do?',ph:'Describe what happens when used.',type:'text'},
-  {id:'ab1Purpose',sec:'Ability 1',si:3,label:'What is Ability 1 mainly for?',type:'choice',ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
-  {id:'ab1CD',sec:'Ability 1',si:3,label:'What is the cooldown for Ability 1?',type:'choice',ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
-  {id:'ab2Name',sec:'Ability 2',si:4,label:'What is Ability 2 called?',ph:'e.g. Smoke Bomb, Fortify, Overload',type:'text'},
-  {id:'ab2Effect',sec:'Ability 2',si:4,label:'What does Ability 2 do?',ph:'Describe what happens when used.',type:'text'},
-  {id:'ab2Purpose',sec:'Ability 2',si:4,label:'What is Ability 2 mainly for?',type:'choice',ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
-  {id:'ab2CD',sec:'Ability 2',si:4,label:'What is the cooldown for Ability 2?',type:'choice',ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
-  {id:'ultName',sec:'Ultimate',si:5,label:'What is the ultimate called?',ph:'e.g. Blackout, Overdrive, Final Stand',type:'text'},
-  {id:'ultEffect',sec:'Ultimate',si:5,label:'What happens when the ultimate is used?',ph:'Describe the big moment.',type:'text'},
-  {id:'ultPurpose',sec:'Ultimate',si:5,label:'What is the ultimate mainly for?',type:'choice',ch:['Big damage','Team support','Survival','Area control','Crowd control','Big movement play']},
-  {id:'ultExciting',sec:'Ultimate',si:5,label:'Why is this ultimate exciting?',hint:'What makes it feel awesome?',ph:'e.g. Turns the whole fight around, saves the whole team',type:'text'},
-  {id:'strengths',sec:'Strengths & Weaknesses',si:6,label:'What is this character good at?',hint:'Pick 2 or 3.',type:'multi',ch:['Winning 1v1 fights','Staying alive','Helping teammates','Moving fast','Holding an area','Escaping danger','Long-range attacks','Close-range attacks']},
-  {id:'weaknesses',sec:'Strengths & Weaknesses',si:6,label:'What is this character bad at?',hint:'Every good character needs weaknesses. Pick 2 or 3.',type:'multi',ch:['Slow movement','Fragile — low health','Bad at long range','Bad at close range','Needs teammates','Hard to use well','Weak when abilities are on cooldown','Bad in open spaces']},
-  {id:'targetPlayer',sec:'Strengths & Weaknesses',si:6,label:'What kind of player would enjoy this character?',ph:'e.g. Players who like speed, careful aiming, helping the team',type:'text'},
+  // SECTION 0 — IDENTITY
+  {id:'name',         si:0, label:"What is this character's name?",                           hint:'Pick anything — a cool word, nickname, or title.', ph:'e.g. Volt, Rook, Zarrah, Cinder', type:'text'},
+  {id:'theme',        si:0, label:'What is the character supposed to be?',                   hint:'Their look or visual theme.', type:'choice', ch:['Robot','Ninja','Medic','Cowboy','Alien','Heavy Soldier','Mage','Other'], custom:true},
+  {id:'role',         si:0, label:'What is the main role?',                                  type:'choice', ch:['Damage / DPS','Tank','Support','Hybrid']},
+  {id:'teamFunction', si:0, label:'What does this character do for the team?',               hint:'One line describing their purpose in a fight.', ph:'e.g. Info pressure + mobility poke damage', type:'text'},
+  {id:'coreIdea',     si:0, label:'What is the ONE thing that makes this character special?', ph:'e.g. Reveals enemies and punishes bad positioning', type:'text'},
+  {id:'playStyle',    si:0, label:'How should this character feel to play?',                 hint:'Pick 2 or 3 that fit.', type:'multi', ch:['Fast','Heavy','Aggressive','Smart','Sneaky','Protective','Precise','Chaotic']},
+
+  // SECTION 1 — HERO STATS
+  {id:'health',       si:1, label:'How much health does this character have?',               ph:'e.g. 225 HP', type:'text'},
+  {id:'moveSpeed',    si:1, label:'How fast do they move?',                                  ph:'e.g. 16 studs/sec', type:'text'},
+  {id:'hitboxSize',   si:1, label:'What size is the hitbox?',                               hint:'Affects how easy they are to hit.', type:'choice', ch:['Small','Medium','Large']},
+  {id:'difficulty',   si:1, label:'How hard is this character to play well?',               type:'choice', ch:['Easy','Easy → Medium','Medium','Medium → Hard','Hard']},
+  {id:'roleBonus',    si:1, label:'Does this character get a special role bonus?',           hint:'A passive perk tied to their class role. Can leave blank.', ph:'e.g. +10% ultimate charge from eliminations', type:'text'},
+
+  // SECTION 2 — PRIMARY WEAPON
+  {id:'primaryName',       si:2, label:'What is the primary weapon called?',                ph:'e.g. Pulse Carbine, Storm Bow, Hex Blaster', type:'text'},
+  {id:'primaryFiringMode', si:2, label:'How does it fire?',                                 type:'choice', ch:['Hitscan — single shot','Hitscan — burst fire','Hitscan — auto','Projectile — single','Projectile — burst','Projectile — auto','Melee','Charged shot']},
+  {id:'primaryDamage',     si:2, label:'What damage does it deal?',                         hint:'Include per-bullet, per-burst, headshot values — whatever applies.', ph:'e.g. 22 per bullet · 66 per burst (body) · 99 per burst (headshots)', type:'textarea'},
+  {id:'primaryFireRate',   si:2, label:'How fast does it fire?',                            ph:'e.g. 2.3 bursts per second, 8 shots per second', type:'text'},
+  {id:'primaryMagSize',    si:2, label:'What is the magazine size?',                        ph:'e.g. 24 bursts (72 bullets total)', type:'text'},
+  {id:'primaryReload',     si:2, label:'How long does it take to reload?',                  ph:'e.g. 1.6 seconds', type:'text'},
+  {id:'primaryRange',      si:2, label:'What is the effective range and falloff?',           hint:'Describe full damage range, where falloff starts, and minimum damage.', ph:'e.g. Full damage: 0–35 studs · Falloff after 35 studs · Min 70% at long range', type:'textarea'},
+  {id:'primaryHeadshot',   si:2, label:'What is the headshot multiplier?',                  ph:'e.g. ×1.5', type:'text'},
+
+  // SECTION 3 — SECONDARY / SIGNATURE
+  {id:'secondaryType',        si:3, label:'What kind of secondary does this character have?', type:'choice', ch:['Signature ability (no weapon)','Backup weapon','No secondary']},
+  {id:'secondaryName',        si:3, label:'What is the secondary called?',                   ph:'e.g. Pulse Scan, Overload Pistol, Healing Burst', type:'text', skipIf:{id:'secondaryType',val:'No secondary'}},
+  {id:'secondaryEffect',      si:3, label:'What does the secondary do?',                     ph:'e.g. Cone scan that reveals enemies through walls', type:'textarea', skipIf:{id:'secondaryType',val:'No secondary'}},
+  {id:'secondaryStats',       si:3, label:'Key stats for the secondary?',                    hint:'Range, cooldown, cast time, duration — whatever applies.', ph:'e.g. 70° cone · 45 stud range · 1.75 sec reveal · 10 sec cooldown', type:'textarea', skipIf:{id:'secondaryType',val:'No secondary'}},
+  {id:'secondaryTeamEffect',  si:3, label:'Does it affect teammates?',                       hint:'Optional — skip if it only affects Zarrah.', ph:'e.g. Revealed enemies are visible to all teammates', type:'text', skipIf:{id:'secondaryType',val:'No secondary'}},
+  {id:'secondaryBonusEffect', si:3, label:'Any bonus or extra effects?',                     hint:'Optional — unique bonuses on top of the main effect.', ph:'e.g. Revealed enemies take +10% damage from this hero', type:'text', skipIf:{id:'secondaryType',val:'No secondary'}},
+
+  // SECTION 4 — PASSIVE
+  {id:'passiveName',    si:4, label:'What is the passive ability called?',                   hint:'A passive is always active — it works automatically.', ph:'e.g. Combat Flow, Iron Will, Ghost Step', type:'text'},
+  {id:'passiveEffect',  si:4, label:'What does the passive do?',                             ph:'e.g. Landing damage reduces cooldown timers', type:'textarea'},
+  {id:'passiveScaling', si:4, label:'Does the passive scale with anything?',                 hint:'Optional — skip if it\'s a simple flat bonus.', ph:'e.g. Every 132 damage dealt reduces cooldowns by 1 second', type:'text'},
+  {id:'passiveExcludes',si:4, label:'Does the passive NOT affect anything?',                 hint:'Optional — limits help with balance.', ph:'e.g. Does not affect ultimate charge rate', type:'text'},
+
+  // SECTION 5 — ABILITY 1
+  {id:'ab1Name',        si:5, label:'What is Ability 1 called?',                             ph:'e.g. Vector Dash, Shield Wall, Flash Grenade', type:'text'},
+  {id:'ab1Effect',      si:5, label:'What does Ability 1 do?',                               ph:'Describe what happens when used.', type:'textarea'},
+  {id:'ab1Stats',       si:5, label:'Key stats for Ability 1?',                              hint:'Distance, travel time, radius, duration — whatever applies.', ph:'e.g. 16 stud distance · Instant (0.18 sec travel) · 1 charge', type:'textarea'},
+  {id:'ab1BonusEffect', si:5, label:'Any bonus effects?',                                    hint:'Optional — extra perks during or after the ability.', ph:'e.g. Grants 20% damage resistance during the dash', type:'text'},
+  {id:'ab1Purpose',     si:5, label:'What is Ability 1 mainly for?',                         type:'choice', ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
+  {id:'ab1CD',          si:5, label:'How long is the cooldown?',                             type:'choice', ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
+  {id:'ab1Charges',     si:5, label:'How many charges does it have?',                        type:'choice', ch:['1 charge','2 charges','3 charges','Unlimited / No charges']},
+
+  // SECTION 6 — ABILITY 2
+  {id:'ab2Name',        si:6, label:'What is Ability 2 called?',                             ph:'e.g. Static Trap, Smoke Bomb, Fortify', type:'text'},
+  {id:'ab2Effect',      si:6, label:'What does Ability 2 do?',                               ph:'Describe what happens when used.', type:'textarea'},
+  {id:'ab2Stats',       si:6, label:'Key stats for Ability 2?',                              hint:'Throw distance, trigger radius, damage, slow %, lifetime — whatever applies.', ph:'e.g. 20 stud throw · 8 stud radius · 45 damage · 30% slow for 2 sec · 18 sec lifetime', type:'textarea'},
+  {id:'ab2Purpose',     si:6, label:'What is Ability 2 mainly for?',                         type:'choice', ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
+  {id:'ab2CD',          si:6, label:'How long is the cooldown?',                             type:'choice', ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
+  {id:'ab2MaxActive',   si:6, label:'How many can be active at once?',                       ph:'e.g. 1, 2, or Unlimited', type:'text'},
+
+  // SECTION 7 — ULTIMATE
+  {id:'ultName',         si:7, label:'What is the ultimate called?',                         ph:'e.g. Arc Breaker, Blackout, Final Stand', type:'text'},
+  {id:'ultEffect',       si:7, label:'What happens when the ultimate is used?',               ph:'Describe the big moment.', type:'textarea'},
+  {id:'ultStats',        si:7, label:'Key stats for the ultimate?',                          hint:'Cast time, range, width, damage, pierce info — whatever applies.', ph:'e.g. 0.7 sec charge · 4 stud width · 120 stud range · 180 damage · Pierces all enemies', type:'textarea'},
+  {id:'ultExtraEffects', si:7, label:'Any extra effects on hit?',                            hint:'Optional — conditions applied to enemies hit.', ph:'e.g. Revealed for 2 sec · Slowed 25% for 1.5 sec', type:'text'},
+  {id:'ultCost',         si:7, label:'What is the ultimate charge cost?',                    ph:'e.g. 2100 ult charge', type:'text'},
+  {id:'ultPurpose',      si:7, label:'What is the ultimate mainly for?',                     type:'choice', ch:['Big damage','Team support','Survival','Area control','Crowd control','Big movement play']},
+  {id:'ultExciting',     si:7, label:'Why is this ultimate exciting to use?',                ph:'e.g. Pierces the entire enemy team if lined up right', type:'textarea'},
+
+  // SECTION 8 — STRENGTHS & WEAKNESSES
+  {id:'strengths',     si:8, label:'What is this character good at?',                        hint:'Pick 2 or 3.', type:'multi', ch:['Winning 1v1 fights','Staying alive','Helping teammates','Moving fast','Holding an area','Escaping danger','Long-range attacks','Close-range attacks','Tracking enemies','Controlling space']},
+  {id:'weaknesses',    si:8, label:'What is this character bad at?',                         hint:'Every good character needs weaknesses. Pick 2 or 3.', type:'multi', ch:['Slow movement','Fragile — low health','Bad at long range','Bad at close range','Needs teammates to be useful','Hard to master','Weak when abilities are on cooldown','Bad in open spaces','Low sustained damage','No escape options']},
+  {id:'targetPlayer',  si:8, label:'What kind of player would enjoy this character?',        ph:'e.g. Players who like speed, tracking enemies, and outplaying with positioning', type:'text'},
 ];
 
-let idx=0, answers={};
+// ─── STATE ───────────────────────────────────────────────────────
+let idx = 0, answers = {}, started = false;
 
-function cd(s){return s.includes('Short')?'5–8 seconds':s.includes('Medium')?'9–14 seconds':'15+ seconds';}
+// ─── HELPERS ─────────────────────────────────────────────────────
+function cd(s){return s.includes('Short')?'5–8s':s.includes('Medium')?'9–14s':'15+s';}
 function arr(v){return v&&v!=='None'?v.split('|'):[];}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function t(s){return esc(s)||'—';}
+function shouldSkip(q){return q.skipIf?answers[q.skipIf.id]===q.skipIf.val:false;}
 
-function shouldSkip(q){
-  if(!q.skipIf)return false;
-  return answers[q.skipIf.id]===q.skipIf.val;
+// ─── START SCREEN ────────────────────────────────────────────────
+function showStart(){
+  document.getElementById('startArea').innerHTML = `
+    <div class="start-screen">
+      <h2>Let's Build a Hero</h2>
+      <p>This tool walks you through every part of a hero design — from stats to abilities. Start a new blank character, or load the Zarrah example to see how it all fits together.</p>
+      <div class="start-options">
+        <div class="start-card" onclick="startFresh()">
+          <div class="start-card-icon">✏️</div>
+          <h3>Start Fresh</h3>
+          <p>Create a brand new character from scratch, one question at a time.</p>
+        </div>
+        <div class="start-card example" onclick="loadZarrah()">
+          <div class="start-card-icon">⚡</div>
+          <h3>Load Example</h3>
+          <p>See a fully filled-out character to understand the format.</p>
+          <div class="ex-name">ZARRAH — DPS</div>
+        </div>
+      </div>
+    </div>`;
 }
 
+function startFresh(){
+  document.getElementById('startArea').innerHTML='';
+  started=true; idx=0; answers={};
+  render();
+}
+
+function loadZarrah(){
+  document.getElementById('startArea').innerHTML='';
+  started=true; idx=Q.length; answers=Object.assign({},ZARRAH);
+  showFinal();
+}
+
+// ─── RENDER QUESTION ─────────────────────────────────────────────
 function render(){
   while(idx<Q.length&&shouldSkip(Q[idx])){answers[Q[idx].id]='None';idx++;}
   if(idx>=Q.length){showFinal();return;}
+
   const q=Q[idx];
   const pct=Math.round((idx/Q.length)*90);
   document.getElementById('progFill').style.width=pct+'%';
   document.getElementById('pctLabel').textContent=pct+'%';
-  document.getElementById('secLabel').textContent=`Section ${q.si+1} of 8 — ${q.sec}`;
+  document.getElementById('secLabel').textContent=`Section ${q.si+1} of 9 — ${SEC[q.si]}`;
   document.querySelectorAll('.sec-tab').forEach((el,i)=>{
     el.className='sec-tab'+(i<q.si?' done':i===q.si?' active':'');
   });
@@ -158,29 +373,31 @@ function render(){
 
   if(q.type==='text'){
     inner=`<input class="q-input" id="qInp" type="text" placeholder="${esc(q.ph||'')}" value="${esc(saved)}" autocomplete="off">`;
-  } else if(q.type==='choice'){
+  }else if(q.type==='textarea'){
+    inner=`<textarea class="q-textarea" id="qInp" placeholder="${esc(q.ph||'')}">${esc(saved)}</textarea>`;
+  }else if(q.type==='choice'){
     inner=`<div class="choices">${q.ch.map(c=>`<div class="choice${saved===c?' sel':''}" onclick="pick(this,'${esc(c)}')">${c}</div>`).join('')}</div>`;
-    if(q.custom){inner+=`<input class="q-input" id="qInp" type="text" placeholder="Or type your own…" style="margin-top:12px" value="${saved&&!q.ch.includes(saved)?esc(saved):''}" autocomplete="off">`;}
-  } else if(q.type==='multi'){
+    if(q.custom)inner+=`<input class="q-input" id="qInp" type="text" placeholder="Or type your own…" style="margin-top:13px" value="${saved&&!q.ch.includes(saved)?esc(saved):''}" autocomplete="off">`;
+  }else if(q.type==='multi'){
     const sel=saved?saved.split('|'):[];
     inner=`<p class="multi-note">Select 2 or 3</p><div class="choices">${q.ch.map(c=>`<div class="choice${sel.includes(c)?' sel-multi':''}" onclick="pickM(this)">${c}</div>`).join('')}</div>`;
   }
 
   document.getElementById('questionArea').innerHTML=`
     <div class="q-card">
-      <div class="q-sec">${q.sec}</div>
+      <div class="q-sec">${SEC[q.si]}</div>
       <div class="q-label">${q.label}</div>
       ${q.hint?`<div class="q-hint">${q.hint}</div>`:''}
       ${inner}
       <div class="nav">
         ${idx>0?`<button class="btn-back" onclick="goBack()">← Back</button>`:''}
-        <button class="btn-next" onclick="goNext()">${idx===Q.length-1?'FINISH →':'NEXT →'}</button>
-        ${q.type==='text'||q.type==='multi'?`<span class="skip-lnk" onclick="skip()">skip</span>`:''}
+        <button class="btn-next" onclick="goNext()">${idx===Q.length-1?'Finish ✓':'Next →'}</button>
+        ${q.type!=='choice'||q.custom?`<span class="skip-lnk" onclick="skip()">Skip</span>`:''}
       </div>
     </div>`;
 
   const inp=document.getElementById('qInp');
-  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')goNext();});
+  if(inp&&q.type!=='textarea')inp.addEventListener('keydown',e=>{if(e.key==='Enter')goNext();});
 }
 
 function pick(el,val){
@@ -189,12 +406,11 @@ function pick(el,val){
   const inp=document.getElementById('qInp');
   if(inp)inp.value='';
 }
-
 function pickM(el){el.classList.toggle('sel-multi');}
 
 function getVal(){
   const q=Q[idx];
-  if(q.type==='text')return(document.getElementById('qInp')?.value||'').trim();
+  if(q.type==='text'||q.type==='textarea')return(document.getElementById('qInp')?.value||'').trim();
   if(q.type==='choice'){
     const inp=document.getElementById('qInp');
     if(inp&&inp.value.trim())return inp.value.trim();
@@ -211,68 +427,184 @@ function goNext(){
   idx++;render();
   window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function goBack(){
   if(idx>0){idx--;while(idx>0&&shouldSkip(Q[idx]))idx--;render();window.scrollTo({top:0,behavior:'smooth'});}
 }
-
 function skip(){answers[Q[idx].id]='None';idx++;render();window.scrollTo({top:0,behavior:'smooth'});}
 
+// ─── FINAL OUTPUT ─────────────────────────────────────────────────
 function showFinal(){
   document.getElementById('progFill').style.width='100%';
   document.getElementById('pctLabel').textContent='100%';
-  document.getElementById('secLabel').textContent='Complete!';
+  document.getElementById('secLabel').textContent='Complete! 🎉';
   document.querySelectorAll('.sec-tab').forEach(el=>el.className='sec-tab done');
   document.getElementById('questionArea').innerHTML='';
-  const a=answers;
 
+  const a=answers;
+  const has=id=>a[id]&&a[id]!=='None'&&a[id]!=='';
+
+  // Build JSON
   const json={
-    name:a.name||'',theme:a.theme||'',role:a.role||'',coreIdea:a.coreIdea||'',
+    name:a.name||'',
+    theme:a.theme||'',
+    role:a.role||'',
+    teamFunction:a.teamFunction||'',
+    coreIdea:a.coreIdea||'',
     playStyle:arr(a.playStyle),
-    primaryWeapon:{name:a.primaryName||'',type:a.primaryName||'',range:a.primaryRange||'',fireStyle:a.primaryFire||'',notes:''},
-    secondaryWeapon:{name:a.secondaryName||'None',purpose:a.secondaryName&&a.secondaryName!=='None'?'Situational backup':'None',notes:''},
-    passive:{name:a.passiveName||'',effect:a.passiveEffect||'',purpose:'Always active'},
-    ability1:{name:a.ab1Name||'',effect:a.ab1Effect||'',purpose:a.ab1Purpose||'',cooldown:a.ab1CD?cd(a.ab1CD):'',notes:''},
-    ability2:{name:a.ab2Name||'',effect:a.ab2Effect||'',purpose:a.ab2Purpose||'',cooldown:a.ab2CD?cd(a.ab2CD):'',notes:''},
-    ultimate:{name:a.ultName||'',effect:a.ultEffect||'',purpose:a.ultPurpose||'',whyExciting:a.ultExciting||'',notes:''},
-    strengths:arr(a.strengths),weaknesses:arr(a.weaknesses),targetPlayer:a.targetPlayer||'',
-    buildNotes:{difficulty:'Medium',prototypePriority:['Primary weapon','Ability 1','Passive','Ability 2','Ultimate'],risks:['Balance testing needed','Ultimate timing may need tuning'],simplifications:['Build primary weapon first','Add abilities one at a time']}
+    heroStats:{
+      health:a.health||'',
+      movementSpeed:a.moveSpeed||'',
+      hitboxSize:a.hitboxSize||'',
+      difficulty:a.difficulty||'',
+      roleBonus:a.roleBonus||'None'
+    },
+    primaryWeapon:{
+      name:a.primaryName||'',
+      firingMode:a.primaryFiringMode||'',
+      damage:a.primaryDamage||'',
+      fireRate:a.primaryFireRate||'',
+      magazineSize:a.primaryMagSize||'',
+      reloadTime:a.primaryReload||'',
+      effectiveRange:a.primaryRange||'',
+      headshotMultiplier:a.primaryHeadshot||''
+    },
+    secondary:{
+      type:a.secondaryType||'None',
+      name:a.secondaryName||'None',
+      effect:a.secondaryEffect||'None',
+      keyStats:a.secondaryStats||'None',
+      teamEffect:a.secondaryTeamEffect||'None',
+      bonusEffect:a.secondaryBonusEffect||'None'
+    },
+    passive:{
+      name:a.passiveName||'',
+      effect:a.passiveEffect||'',
+      scaling:a.passiveScaling||'None',
+      excludes:a.passiveExcludes||'None'
+    },
+    ability1:{
+      name:a.ab1Name||'',
+      effect:a.ab1Effect||'',
+      keyStats:a.ab1Stats||'',
+      bonusEffect:a.ab1BonusEffect||'None',
+      purpose:a.ab1Purpose||'',
+      cooldown:a.ab1CD?cd(a.ab1CD):'',
+      charges:a.ab1Charges||'1 charge'
+    },
+    ability2:{
+      name:a.ab2Name||'',
+      effect:a.ab2Effect||'',
+      keyStats:a.ab2Stats||'',
+      purpose:a.ab2Purpose||'',
+      cooldown:a.ab2CD?cd(a.ab2CD):'',
+      maxActive:a.ab2MaxActive||''
+    },
+    ultimate:{
+      name:a.ultName||'',
+      effect:a.ultEffect||'',
+      keyStats:a.ultStats||'',
+      extraEffects:a.ultExtraEffects||'None',
+      chargeCost:a.ultCost||'',
+      purpose:a.ultPurpose||'',
+      whyExciting:a.ultExciting||''
+    },
+    strengths:arr(a.strengths),
+    weaknesses:arr(a.weaknesses),
+    targetPlayer:a.targetPlayer||'',
+    buildNotes:{
+      difficulty:a.difficulty||'Medium',
+      prototypePriority:['Primary weapon','Ability 1','Passive','Ability 2','Secondary','Ultimate'],
+      risks:['Balance testing needed','Passive scaling needs playtesting','Ultimate timing may need tuning'],
+      simplifications:['Build primary weapon first','Add abilities one at a time','Test passive separately']
+    }
   };
 
   const js=JSON.stringify(json,null,2);
   const tags=(arr,cls)=>arr.length?arr.map(s=>`<span class="tag ${cls||''}">${esc(s)}</span>`).join(''):'—';
+  const row=(lbl,val,full)=>`<div class="sheet-card${full?' full':''}"><div class="card-lbl">${lbl}</div><div class="card-val">${val||'—'}</div></div>`;
+  const rowSmall=(lbl,main,sub,full)=>`<div class="sheet-card${full?' full':''}"><div class="card-lbl">${lbl}</div><div class="card-val">${main||'—'}${sub?`<small>${sub}</small>`:''}</div></div>`;
 
   document.getElementById('finalArea').innerHTML=`
+    <div class="complete-header">✓ ${t(a.name)||'Hero'} — Character Complete</div>
     <div class="final-panel">
       <div class="final-tabs">
-        <button class="tab-btn active" onclick="tab(this,'sheet')">CHARACTER SHEET</button>
-        <button class="tab-btn" onclick="tab(this,'json')">JSON OUTPUT</button>
+        <button class="tab-btn active" onclick="tab(this,'sheet')">Character Sheet</button>
+        <button class="tab-btn" onclick="tab(this,'json')">JSON Output</button>
       </div>
+
       <div class="tab-panel active" id="tab-sheet">
         <div class="sheet-grid">
-          <div class="sheet-card"><div class="card-lbl">Name</div><div class="card-val">${t(a.name)}</div></div>
-          <div class="sheet-card"><div class="card-lbl">Role</div><div class="card-val">${t(a.role)}</div></div>
-          <div class="sheet-card"><div class="card-lbl">Theme</div><div class="card-val">${t(a.theme)}</div></div>
-          <div class="sheet-card"><div class="card-lbl">Target Player</div><div class="card-val">${t(a.targetPlayer)}</div></div>
-          <div class="sheet-card full"><div class="card-lbl">Core Idea</div><div class="card-val">${t(a.coreIdea)}</div></div>
+
+          <div class="sheet-section-title">Identity</div>
+          ${row('Name',t(a.name))}
+          ${row('Role',t(a.role))}
+          ${row('Theme',t(a.theme))}
+          ${row('Difficulty',t(a.difficulty))}
+          ${row('Team Function',t(a.teamFunction),true)}
+          ${row('Core Idea',t(a.coreIdea),true)}
           <div class="sheet-card full"><div class="card-lbl">Play Style</div><div class="card-val">${tags(arr(a.playStyle))}</div></div>
-          <div class="sheet-card"><div class="card-lbl">Primary Weapon</div><div class="card-val">${t(a.primaryName)}<br><small style="color:var(--text-dim)">${t(a.primaryRange)} · ${t(a.primaryFire)}</small></div></div>
-          <div class="sheet-card"><div class="card-lbl">Secondary Weapon</div><div class="card-val">${t(a.secondaryName)}</div></div>
-          <div class="sheet-card full"><div class="card-lbl">Passive — ${t(a.passiveName)}</div><div class="card-val">${t(a.passiveEffect)}</div></div>
-          <div class="sheet-card"><div class="card-lbl">Ability 1 — ${t(a.ab1Name)}</div><div class="card-val">${t(a.ab1Effect)}<br><small style="color:var(--text-dim)">For: ${t(a.ab1Purpose)} · CD: ${a.ab1CD?cd(a.ab1CD):'—'}</small></div></div>
-          <div class="sheet-card"><div class="card-lbl">Ability 2 — ${t(a.ab2Name)}</div><div class="card-val">${t(a.ab2Effect)}<br><small style="color:var(--text-dim)">For: ${t(a.ab2Purpose)} · CD: ${a.ab2CD?cd(a.ab2CD):'—'}</small></div></div>
-          <div class="sheet-card full"><div class="card-lbl">Ultimate — ${t(a.ultName)}</div><div class="card-val">${t(a.ultEffect)}</div></div>
-          <div class="sheet-card full"><div class="card-lbl">Why the Ultimate is Exciting</div><div class="card-val">${t(a.ultExciting)}</div></div>
+
+          <div class="sheet-section-title">Hero Stats</div>
+          ${row('Health',t(a.health))}
+          ${row('Move Speed',t(a.moveSpeed))}
+          ${row('Hitbox',t(a.hitboxSize))}
+          ${row('Role Bonus',t(a.roleBonus))}
+
+          <div class="sheet-section-title">Primary Weapon</div>
+          ${rowSmall('Weapon',t(a.primaryName),t(a.primaryFiringMode),true)}
+          ${row('Damage',t(a.primaryDamage),true)}
+          ${row('Fire Rate',t(a.primaryFireRate))}
+          ${row('Magazine',t(a.primaryMagSize))}
+          ${row('Reload',t(a.primaryReload))}
+          ${row('Headshot ×',t(a.primaryHeadshot))}
+          ${row('Range & Falloff',t(a.primaryRange),true)}
+
+          <div class="sheet-section-title">Secondary / Signature</div>
+          ${rowSmall('Type & Name',t(a.secondaryType),t(a.secondaryName),true)}
+          ${has('secondaryEffect')?row('Effect',t(a.secondaryEffect),true):''}
+          ${has('secondaryStats')?row('Key Stats',t(a.secondaryStats),true):''}
+          ${has('secondaryTeamEffect')?row('Team Effect',t(a.secondaryTeamEffect),true):''}
+          ${has('secondaryBonusEffect')?row('Bonus Effect',t(a.secondaryBonusEffect),true):''}
+
+          <div class="sheet-section-title">Passive</div>
+          ${rowSmall('Passive',t(a.passiveName),'Always active',true)}
+          ${row('Effect',t(a.passiveEffect),true)}
+          ${has('passiveScaling')?row('Scaling',t(a.passiveScaling),true):''}
+          ${has('passiveExcludes')?row('Does NOT affect',t(a.passiveExcludes),true):''}
+
+          <div class="sheet-section-title">Ability 1</div>
+          ${rowSmall('Ability 1',t(a.ab1Name),`Purpose: ${t(a.ab1Purpose)} · CD: ${a.ab1CD?cd(a.ab1CD):'—'} · Charges: ${t(a.ab1Charges)}`,true)}
+          ${row('Effect',t(a.ab1Effect),true)}
+          ${has('ab1Stats')?row('Key Stats',t(a.ab1Stats),true):''}
+          ${has('ab1BonusEffect')?row('Bonus Effect',t(a.ab1BonusEffect),true):''}
+
+          <div class="sheet-section-title">Ability 2</div>
+          ${rowSmall('Ability 2',t(a.ab2Name),`Purpose: ${t(a.ab2Purpose)} · CD: ${a.ab2CD?cd(a.ab2CD):'—'} · Max Active: ${t(a.ab2MaxActive)}`,true)}
+          ${row('Effect',t(a.ab2Effect),true)}
+          ${has('ab2Stats')?row('Key Stats',t(a.ab2Stats),true):''}
+
+          <div class="sheet-section-title">Ultimate</div>
+          ${rowSmall('Ultimate',t(a.ultName),`For: ${t(a.ultPurpose)} · Cost: ${t(a.ultCost)}`,true)}
+          ${row('Effect',t(a.ultEffect),true)}
+          ${has('ultStats')?row('Key Stats',t(a.ultStats),true):''}
+          ${has('ultExtraEffects')?row('Extra Effects on Hit',t(a.ultExtraEffects),true):''}
+          ${row('Why It\'s Exciting',t(a.ultExciting),true)}
+
+          <div class="sheet-section-title">Strengths & Weaknesses</div>
           <div class="sheet-card"><div class="card-lbl">Strengths</div><div class="card-val">${tags(arr(a.strengths),'g')}</div></div>
           <div class="sheet-card"><div class="card-lbl">Weaknesses</div><div class="card-val">${tags(arr(a.weaknesses),'o')}</div></div>
+          ${row('Target Player',t(a.targetPlayer),true)}
+
         </div>
       </div>
+
       <div class="tab-panel" id="tab-json">
-        <button class="copy-btn" id="copyBtn" onclick="copyJ()">📋 COPY JSON</button>
+        <button class="copy-btn" id="copyBtn" onclick="copyJ()">📋 Copy JSON</button>
         <button class="restart-btn" onclick="restart()">↺ New Character</button>
         <pre id="jsonOut">${esc(js)}</pre>
       </div>
     </div>`;
+
   document.getElementById('finalArea').scrollIntoView({behavior:'smooth'});
 }
 
@@ -286,8 +618,8 @@ function tab(btn,id){
 function copyJ(){
   navigator.clipboard.writeText(document.getElementById('jsonOut').textContent).then(()=>{
     const b=document.getElementById('copyBtn');
-    b.textContent='✓ COPIED!';b.classList.add('ok');
-    setTimeout(()=>{b.textContent='📋 COPY JSON';b.classList.remove('ok');},2000);
+    b.textContent='✓ Copied!';b.classList.add('ok');
+    setTimeout(()=>{b.textContent='📋 Copy JSON';b.classList.remove('ok');},2000);
   });
 }
 
@@ -295,10 +627,12 @@ function restart(){
   if(!confirm('Start a new character? Current answers will be cleared.'))return;
   idx=0;answers={};
   document.getElementById('finalArea').innerHTML='';
-  render();window.scrollTo({top:0,behavior:'smooth'});
+  showStart();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-render();
+// ─── INIT ────────────────────────────────────────────────────────
+showStart();
 </script>
 </body>
 </html>
