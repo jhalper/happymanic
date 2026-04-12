@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Builder — Roblox Character Designer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080c14; --surface:#0f1624; --surface2:#161f33; --border:#1e2d4a;
+    --accent:#00d4ff; --accent2:#ff6b35; --accent3:#7fff6b;
+    --text:#cfd8f0; --text-dim:#5a6a8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .app{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:32px 20px 80px;}
+  .badge{display:inline-block;background:linear-gradient(135deg,var(--accent2),#ff9a00);color:#000;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:2px;margin-bottom:14px;}
+  h1{font-family:'Orbitron',sans-serif;font-size:clamp(26px,6vw,42px);font-weight:900;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;line-height:1.1;}
+  .subtitle{color:var(--text-dim);font-size:14px;margin-bottom:32px;}
+  .prog-wrap{margin-bottom:10px;}
+  .prog-top{display:flex;justify-content:space-between;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px;}
+  .prog-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:16px;}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease;box-shadow:0 0 8px rgba(0,212,255,.5);}
+  .sec-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:32px;}
+  .sec-tab{flex:1;min-width:55px;padding:5px 6px;border:1px solid var(--border);border-radius:3px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.5px;color:var(--text-dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .2s;}
+  .sec-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);}
+  .sec-tab.done{border-color:var(--accent3);color:var(--accent3);background:rgba(127,255,107,.05);}
+  .q-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 26px;margin-bottom:16px;animation:slideUp .3s ease both;}
+  .q-sec{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;}
+  .q-label{font-size:18px;font-weight:600;color:#fff;margin-bottom:6px;line-height:1.4;}
+  .q-hint{font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;}
+  .q-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;padding:12px 16px;outline:none;transition:border-color .2s;}
+  .q-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,255,.1);}
+  .q-input::placeholder{color:var(--text-dim);}
+  .choices{display:flex;flex-wrap:wrap;gap:8px;}
+  .choice{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:7px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;transition:all .15s;user-select:none;}
+  .choice:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.07);}
+  .choice.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.13);}
+  .choice.sel-multi{border-color:var(--accent3);color:var(--accent3);background:rgba(127,255,107,.08);}
+  .multi-note{font-size:12px;color:var(--text-dim);margin-bottom:10px;}
+  .nav{display:flex;gap:10px;margin-top:20px;align-items:center;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),#0077cc);border:none;border-radius:8px;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;padding:12px 24px;cursor:pointer;transition:all .2s;}
+  .btn-next:hover{transform:translateY(-1px);box-shadow:0 0 16px rgba(0,212,255,.4);}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;padding:12px 20px;border-radius:8px;cursor:pointer;transition:all .2s;}
+  .btn-back:hover{border-color:var(--text-dim);color:var(--text);}
+  .skip-lnk{font-size:12px;color:var(--text-dim);margin-left:auto;cursor:pointer;padding:4px;}
+  .skip-lnk:hover{color:var(--text);}
+  .final-panel{background:var(--surface);border:1px solid var(--accent);border-radius:14px;overflow:hidden;box-shadow:0 0 40px rgba(0,212,255,.12);animation:slideUp .4s ease both;}
+  .final-tabs{display:flex;border-bottom:1px solid var(--border);}
+  .tab-btn{flex:1;background:transparent;border:none;color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;padding:14px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,212,255,.05);}
+  .tab-panel{padding:24px;display:none;}
+  .tab-panel.active{display:block;}
+  .sheet-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:480px){.sheet-grid{grid-template-columns:1fr;}}
+  .sheet-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+  .sheet-card.full{grid-column:1/-1;}
+  .card-lbl{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--accent2);margin-bottom:5px;text-transform:uppercase;}
+  .card-val{color:var(--text);font-size:15px;line-height:1.5;}
+  .tag{display:inline-block;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);color:var(--accent);font-size:12px;padding:2px 9px;border-radius:3px;margin:2px 2px 2px 0;}
+  .tag.g{background:rgba(127,255,107,.1);border-color:rgba(127,255,107,.2);color:var(--accent3);}
+  .tag.o{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.2);color:var(--accent2);}
+  pre{background:#050810;border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;font-size:12px;line-height:1.7;color:#7ecfff;font-family:'Courier New',monospace;white-space:pre-wrap;word-break:break-word;}
+  .copy-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;margin-bottom:14px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+  .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .copy-btn.ok{border-color:var(--accent3);color:var(--accent3);}
+  .restart-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;margin-left:10px;transition:all .2s;}
+  .restart-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+  @keyframes slideUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div style="animation:slideUp .5s ease both">
+    <div class="badge">🎮 Roblox Hero Builder</div>
+    <h1>Design Your Hero</h1>
+    <p class="subtitle">Answer each question to build your character — then grab the final output.</p>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-top"><span id="secLabel">Section 1 of 8 — Identity</span><span id="pctLabel">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div class="sec-tabs" id="secTabs">
+    <div class="sec-tab active">Identity</div>
+    <div class="sec-tab">Combat</div>
+    <div class="sec-tab">Passive</div>
+    <div class="sec-tab">Ability 1</div>
+    <div class="sec-tab">Ability 2</div>
+    <div class="sec-tab">Ultimate</div>
+    <div class="sec-tab">Strengths</div>
+    <div class="sec-tab">Review</div>
+  </div>
+  <div id="questionArea"></div>
+  <div id="finalArea"></div>
+</div>
+
+<script>
+const Q = [
+  {id:'name',sec:'Identity',si:0,label:"What is this character's name?",hint:'Pick anything — a cool word, nickname, or title.',ph:'e.g. Volt, Rook, Cinder, Patch',type:'text'},
+  {id:'theme',sec:'Identity',si:0,label:'What is the character supposed to be?',hint:'Their look or backstory.',type:'choice',ch:['Robot','Ninja','Medic','Cowboy','Alien','Heavy Soldier','Mage','Other'],custom:true},
+  {id:'role',sec:'Identity',si:0,label:'What is the main role?',hint:'How do they help the team?',type:'choice',ch:['Damage','Tank','Support','Hybrid']},
+  {id:'coreIdea',sec:'Identity',si:0,label:'What is the ONE thing that makes this character special?',hint:'Keep it to one clear idea.',ph:'e.g. Very fast, hard to kill, heals teammates',type:'text'},
+  {id:'playStyle',sec:'Identity',si:0,label:'How should this character feel to play?',hint:'Pick 2 or 3.',type:'multi',ch:['Fast','Heavy','Aggressive','Smart','Sneaky','Protective','Precise','Chaotic']},
+  {id:'primaryName',sec:'Core Combat',si:1,label:'What is the primary weapon?',type:'choice',ch:['Rifle','Shotgun','Sword','Bow','Blaster','Magic Attack','Sniper','Other'],custom:true},
+  {id:'primaryRange',sec:'Core Combat',si:1,label:'What range does it work best at?',type:'choice',ch:['Short range','Medium range','Long range']},
+  {id:'primaryFire',sec:'Core Combat',si:1,label:'How does it fire?',type:'choice',ch:['Hits instantly (hitscan)','Fires projectiles','Slow but strong shots','Fast fire rate','Charged shot']},
+  {id:'hasSecondary',sec:'Core Combat',si:1,label:'Does this character need a secondary weapon?',hint:'Not every hero needs one.',type:'choice',ch:['Yes','No']},
+  {id:'secondaryName',sec:'Core Combat',si:1,label:'What is the secondary weapon?',hint:'When should the player use it?',ph:'e.g. Backup pistol, close-range knife, healing gadget',type:'text',skipIf:{id:'hasSecondary',val:'No'}},
+  {id:'passiveName',sec:'Passive',si:2,label:'What is the passive ability called?',hint:'A passive works automatically — always on.',ph:'e.g. Adrenaline, Iron Skin, Ghost Step',type:'text'},
+  {id:'passiveEffect',sec:'Passive',si:2,label:'What does the passive do?',hint:'One automatic effect.',ph:'e.g. Moves faster at low health, slowly heals over time',type:'text'},
+  {id:'ab1Name',sec:'Ability 1',si:3,label:'What is Ability 1 called?',ph:'e.g. Dash, Shield Wall, Flash Grenade',type:'text'},
+  {id:'ab1Effect',sec:'Ability 1',si:3,label:'What does Ability 1 do?',ph:'Describe what happens when used.',type:'text'},
+  {id:'ab1Purpose',sec:'Ability 1',si:3,label:'What is Ability 1 mainly for?',type:'choice',ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
+  {id:'ab1CD',sec:'Ability 1',si:3,label:'What is the cooldown for Ability 1?',type:'choice',ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
+  {id:'ab2Name',sec:'Ability 2',si:4,label:'What is Ability 2 called?',ph:'e.g. Smoke Bomb, Fortify, Overload',type:'text'},
+  {id:'ab2Effect',sec:'Ability 2',si:4,label:'What does Ability 2 do?',ph:'Describe what happens when used.',type:'text'},
+  {id:'ab2Purpose',sec:'Ability 2',si:4,label:'What is Ability 2 mainly for?',type:'choice',ch:['Movement','Damage','Defense','Healing','Escape','Crowd control','Utility']},
+  {id:'ab2CD',sec:'Ability 2',si:4,label:'What is the cooldown for Ability 2?',type:'choice',ch:['Short — 5 to 8 seconds','Medium — 9 to 14 seconds','Long — 15+ seconds']},
+  {id:'ultName',sec:'Ultimate',si:5,label:'What is the ultimate called?',ph:'e.g. Blackout, Overdrive, Final Stand',type:'text'},
+  {id:'ultEffect',sec:'Ultimate',si:5,label:'What happens when the ultimate is used?',ph:'Describe the big moment.',type:'text'},
+  {id:'ultPurpose',sec:'Ultimate',si:5,label:'What is the ultimate mainly for?',type:'choice',ch:['Big damage','Team support','Survival','Area control','Crowd control','Big movement play']},
+  {id:'ultExciting',sec:'Ultimate',si:5,label:'Why is this ultimate exciting?',hint:'What makes it feel awesome?',ph:'e.g. Turns the whole fight around, saves the whole team',type:'text'},
+  {id:'strengths',sec:'Strengths & Weaknesses',si:6,label:'What is this character good at?',hint:'Pick 2 or 3.',type:'multi',ch:['Winning 1v1 fights','Staying alive','Helping teammates','Moving fast','Holding an area','Escaping danger','Long-range attacks','Close-range attacks']},
+  {id:'weaknesses',sec:'Strengths & Weaknesses',si:6,label:'What is this character bad at?',hint:'Every good character needs weaknesses. Pick 2 or 3.',type:'multi',ch:['Slow movement','Fragile — low health','Bad at long range','Bad at close range','Needs teammates','Hard to use well','Weak when abilities are on cooldown','Bad in open spaces']},
+  {id:'targetPlayer',sec:'Strengths & Weaknesses',si:6,label:'What kind of player would enjoy this character?',ph:'e.g. Players who like speed, careful aiming, helping the team',type:'text'},
+];
+
+let idx=0, answers={};
+
+function cd(s){return s.includes('Short')?'5–8 seconds':s.includes('Medium')?'9–14 seconds':'15+ seconds';}
+function arr(v){return v&&v!=='None'?v.split('|'):[];}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function t(s){return esc(s)||'—';}
+
+function shouldSkip(q){
+  if(!q.skipIf)return false;
+  return answers[q.skipIf.id]===q.skipIf.val;
+}
+
+function render(){
+  while(idx<Q.length&&shouldSkip(Q[idx])){answers[Q[idx].id]='None';idx++;}
+  if(idx>=Q.length){showFinal();return;}
+  const q=Q[idx];
+  const pct=Math.round((idx/Q.length)*90);
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('pctLabel').textContent=pct+'%';
+  document.getElementById('secLabel').textContent=`Section ${q.si+1} of 8 — ${q.sec}`;
+  document.querySelectorAll('.sec-tab').forEach((el,i)=>{
+    el.className='sec-tab'+(i<q.si?' done':i===q.si?' active':'');
+  });
+
+  const saved=answers[q.id]||'';
+  let inner='';
+
+  if(q.type==='text'){
+    inner=`<input class="q-input" id="qInp" type="text" placeholder="${esc(q.ph||'')}" value="${esc(saved)}" autocomplete="off">`;
+  } else if(q.type==='choice'){
+    inner=`<div class="choices">${q.ch.map(c=>`<div class="choice${saved===c?' sel':''}" onclick="pick(this,'${esc(c)}')">${c}</div>`).join('')}</div>`;
+    if(q.custom){inner+=`<input class="q-input" id="qInp" type="text" placeholder="Or type your own…" style="margin-top:12px" value="${saved&&!q.ch.includes(saved)?esc(saved):''}" autocomplete="off">`;}
+  } else if(q.type==='multi'){
+    const sel=saved?saved.split('|'):[];
+    inner=`<p class="multi-note">Select 2 or 3</p><div class="choices">${q.ch.map(c=>`<div class="choice${sel.includes(c)?' sel-multi':''}" onclick="pickM(this)">${c}</div>`).join('')}</div>`;
+  }
+
+  document.getElementById('questionArea').innerHTML=`
+    <div class="q-card">
+      <div class="q-sec">${q.sec}</div>
+      <div class="q-label">${q.label}</div>
+      ${q.hint?`<div class="q-hint">${q.hint}</div>`:''}
+      ${inner}
+      <div class="nav">
+        ${idx>0?`<button class="btn-back" onclick="goBack()">← Back</button>`:''}
+        <button class="btn-next" onclick="goNext()">${idx===Q.length-1?'FINISH →':'NEXT →'}</button>
+        ${q.type==='text'||q.type==='multi'?`<span class="skip-lnk" onclick="skip()">skip</span>`:''}
+      </div>
+    </div>`;
+
+  const inp=document.getElementById('qInp');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')goNext();});
+}
+
+function pick(el,val){
+  document.querySelectorAll('.choice').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const inp=document.getElementById('qInp');
+  if(inp)inp.value='';
+}
+
+function pickM(el){el.classList.toggle('sel-multi');}
+
+function getVal(){
+  const q=Q[idx];
+  if(q.type==='text')return(document.getElementById('qInp')?.value||'').trim();
+  if(q.type==='choice'){
+    const inp=document.getElementById('qInp');
+    if(inp&&inp.value.trim())return inp.value.trim();
+    return document.querySelector('.choice.sel')?.textContent||'';
+  }
+  if(q.type==='multi')return[...document.querySelectorAll('.choice.sel-multi')].map(e=>e.textContent).join('|');
+  return'';
+}
+
+function goNext(){
+  const val=getVal();
+  if(!val&&Q[idx].type!=='multi'){document.getElementById('qInp')?.focus();return;}
+  answers[Q[idx].id]=val||'None';
+  idx++;render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goBack(){
+  if(idx>0){idx--;while(idx>0&&shouldSkip(Q[idx]))idx--;render();window.scrollTo({top:0,behavior:'smooth'});}
+}
+
+function skip(){answers[Q[idx].id]='None';idx++;render();window.scrollTo({top:0,behavior:'smooth'});}
+
+function showFinal(){
+  document.getElementById('progFill').style.width='100%';
+  document.getElementById('pctLabel').textContent='100%';
+  document.getElementById('secLabel').textContent='Complete!';
+  document.querySelectorAll('.sec-tab').forEach(el=>el.className='sec-tab done');
+  document.getElementById('questionArea').innerHTML='';
+  const a=answers;
+
+  const json={
+    name:a.name||'',theme:a.theme||'',role:a.role||'',coreIdea:a.coreIdea||'',
+    playStyle:arr(a.playStyle),
+    primaryWeapon:{name:a.primaryName||'',type:a.primaryName||'',range:a.primaryRange||'',fireStyle:a.primaryFire||'',notes:''},
+    secondaryWeapon:{name:a.secondaryName||'None',purpose:a.secondaryName&&a.secondaryName!=='None'?'Situational backup':'None',notes:''},
+    passive:{name:a.passiveName||'',effect:a.passiveEffect||'',purpose:'Always active'},
+    ability1:{name:a.ab1Name||'',effect:a.ab1Effect||'',purpose:a.ab1Purpose||'',cooldown:a.ab1CD?cd(a.ab1CD):'',notes:''},
+    ability2:{name:a.ab2Name||'',effect:a.ab2Effect||'',purpose:a.ab2Purpose||'',cooldown:a.ab2CD?cd(a.ab2CD):'',notes:''},
+    ultimate:{name:a.ultName||'',effect:a.ultEffect||'',purpose:a.ultPurpose||'',whyExciting:a.ultExciting||'',notes:''},
+    strengths:arr(a.strengths),weaknesses:arr(a.weaknesses),targetPlayer:a.targetPlayer||'',
+    buildNotes:{difficulty:'Medium',prototypePriority:['Primary weapon','Ability 1','Passive','Ability 2','Ultimate'],risks:['Balance testing needed','Ultimate timing may need tuning'],simplifications:['Build primary weapon first','Add abilities one at a time']}
+  };
+
+  const js=JSON.stringify(json,null,2);
+  const tags=(arr,cls)=>arr.length?arr.map(s=>`<span class="tag ${cls||''}">${esc(s)}</span>`).join(''):'—';
+
+  document.getElementById('finalArea').innerHTML=`
+    <div class="final-panel">
+      <div class="final-tabs">
+        <button class="tab-btn active" onclick="tab(this,'sheet')">CHARACTER SHEET</button>
+        <button class="tab-btn" onclick="tab(this,'json')">JSON OUTPUT</button>
+      </div>
+      <div class="tab-panel active" id="tab-sheet">
+        <div class="sheet-grid">
+          <div class="sheet-card"><div class="card-lbl">Name</div><div class="card-val">${t(a.name)}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Role</div><div class="card-val">${t(a.role)}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Theme</div><div class="card-val">${t(a.theme)}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Target Player</div><div class="card-val">${t(a.targetPlayer)}</div></div>
+          <div class="sheet-card full"><div class="card-lbl">Core Idea</div><div class="card-val">${t(a.coreIdea)}</div></div>
+          <div class="sheet-card full"><div class="card-lbl">Play Style</div><div class="card-val">${tags(arr(a.playStyle))}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Primary Weapon</div><div class="card-val">${t(a.primaryName)}<br><small style="color:var(--text-dim)">${t(a.primaryRange)} · ${t(a.primaryFire)}</small></div></div>
+          <div class="sheet-card"><div class="card-lbl">Secondary Weapon</div><div class="card-val">${t(a.secondaryName)}</div></div>
+          <div class="sheet-card full"><div class="card-lbl">Passive — ${t(a.passiveName)}</div><div class="card-val">${t(a.passiveEffect)}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Ability 1 — ${t(a.ab1Name)}</div><div class="card-val">${t(a.ab1Effect)}<br><small style="color:var(--text-dim)">For: ${t(a.ab1Purpose)} · CD: ${a.ab1CD?cd(a.ab1CD):'—'}</small></div></div>
+          <div class="sheet-card"><div class="card-lbl">Ability 2 — ${t(a.ab2Name)}</div><div class="card-val">${t(a.ab2Effect)}<br><small style="color:var(--text-dim)">For: ${t(a.ab2Purpose)} · CD: ${a.ab2CD?cd(a.ab2CD):'—'}</small></div></div>
+          <div class="sheet-card full"><div class="card-lbl">Ultimate — ${t(a.ultName)}</div><div class="card-val">${t(a.ultEffect)}</div></div>
+          <div class="sheet-card full"><div class="card-lbl">Why the Ultimate is Exciting</div><div class="card-val">${t(a.ultExciting)}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Strengths</div><div class="card-val">${tags(arr(a.strengths),'g')}</div></div>
+          <div class="sheet-card"><div class="card-lbl">Weaknesses</div><div class="card-val">${tags(arr(a.weaknesses),'o')}</div></div>
+        </div>
+      </div>
+      <div class="tab-panel" id="tab-json">
+        <button class="copy-btn" id="copyBtn" onclick="copyJ()">📋 COPY JSON</button>
+        <button class="restart-btn" onclick="restart()">↺ New Character</button>
+        <pre id="jsonOut">${esc(js)}</pre>
+      </div>
+    </div>`;
+  document.getElementById('finalArea').scrollIntoView({behavior:'smooth'});
+}
+
+function tab(btn,id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function copyJ(){
+  navigator.clipboard.writeText(document.getElementById('jsonOut').textContent).then(()=>{
+    const b=document.getElementById('copyBtn');
+    b.textContent='✓ COPIED!';b.classList.add('ok');
+    setTimeout(()=>{b.textContent='📋 COPY JSON';b.classList.remove('ok');},2000);
+  });
+}
+
+function restart(){
+  if(!confirm('Start a new character? Current answers will be cleared.'))return;
+  idx=0;answers={};
+  document.getElementById('finalArea').innerHTML='';
+  render();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+render();
+</script>
+</body>
+</html>
