@@ -1581,6 +1581,8 @@ function updateWizardDisplay(step) {
    CHANGELOG
    ============================================ */
 const CHANGELOG = [
+  { date: 'Apr 15, 2026', tag: 'updated', text: 'Added Repetitive asset production as a selectable pain point for artists and animators — Content velocity reads as producer language, not how artists describe their day. Existing art and animation recommendations remapped accordingly.' },
+  { date: 'Apr 15, 2026', tag: 'updated', text: 'Added three pain points for engineers and designers: Feature implementation speed, Design iteration speed, and Technical debt. The previous list only reflected production/ops concerns. Existing recommendations remapped.' },
   { date: 'Apr 7, 2026', tag: 'new', text: 'Full visual redesign: new dark theme with Space Grotesk typography, glass-panel components, ambient motion, and warm amber/cool cyan dual-accent palette. All functionality preserved.' },
   { date: 'Apr 7, 2026', tag: 'new', text: 'Added Perspectives page to navigation \u2014 a guide for studios where AI debates stall because each role sees it differently.' },
   { date: 'Apr 7, 2026', tag: 'updated', text: 'Crimson Desert cautionary example added to Art recommendation: Pearl Abyss accidentally shipped AI-generated placeholder props, was forced to apologize, add Steam AI disclosure, and patch all affected assets.' },
@@ -1632,8 +1634,6 @@ const CHANGELOG = [
   { date: 'Mar 2026', tag: 'updated', text: 'Pain point selector now offers "Not Sure" with smart suggestions based on your selected discipline.' },
   { date: 'Mar 2026', tag: 'adjusted', text: 'Neural rendering upscaler confidence raised to High — engine plugins now mature with documented 30-60% performance gains across major engines.' },
   { date: 'Mar 2026', tag: 'new', text: 'Initial release — 36 recommendations across 14 disciplines, 24 practical AI tips, caution zones, and category breakdown.' },
-  { date: 'Apr 2026', tag: 'updated', text: 'Added Repetitive asset production pain point for artists and animators. Content velocity existed but reads as producer language — this speaks to the actual daily experience of making prop variants, LODs, and cleaning up mocap.' },
-  { date: 'Apr 2026', tag: 'updated', text: 'Added three pain points that speak to core engineering and design work: Feature implementation speed, Design iteration speed, and Technical debt. Previously the list only covered production/ops concerns. Existing recommendations remapped accordingly.' },
   { date: 'Mar 12, 2026', tag: 'new', text: 'Hello Game Dev World!' }
 ];
 
@@ -3640,34 +3640,32 @@ document.addEventListener('keydown', (e) => {
     });
   });
 
-  // "Start the Wizard" hero button — reset if results are showing
-  document.getElementById('hero-start-wizard').addEventListener('click', (e) => {
-    e.preventDefault();
-    // Hide results/feedback, show form
-    document.getElementById('screen-results').classList.remove('active');
-    document.getElementById('screen-feedback').classList.remove('active');
-    document.getElementById('screen-form').classList.add('active');
-    // Clear scenario state
-    document.getElementById('scenario-banner').classList.remove('visible');
-    window._isScenario = false;
-    // Reset wizard to step 1
-    if (typeof currentStep !== 'undefined') { currentStep = 1; showStep(1); }
-    document.getElementById('screen-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  // "Run with your own answers" from scenario banner
-  document.getElementById('scenario-own-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('scenario-banner').classList.remove('visible');
-    window._isScenario = false;
-    document.getElementById('screen-results').classList.remove('active');
-    document.getElementById('screen-feedback').classList.remove('active');
-    document.getElementById('screen-form').classList.add('active');
-    // Reset wizard to step 1
-    if (typeof currentStep !== 'undefined') { currentStep = 1; showStep(1); }
-    document.getElementById('screen-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
 })();
+
+// "Start the Wizard" hero button — outside the IIFE so it always registers
+// regardless of whether #scenarios-grid exists in the DOM
+document.getElementById('hero-start-wizard').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-feedback').classList.remove('active');
+  document.getElementById('screen-form').classList.add('active');
+  document.getElementById('scenario-banner').classList.remove('visible');
+  window._isScenario = false;
+  if (typeof currentStep !== 'undefined') { currentStep = 1; showStep(1); }
+  document.getElementById('screen-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// "Run with your own answers" from scenario banner — same fix
+document.getElementById('scenario-own-btn').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('scenario-banner').classList.remove('visible');
+  window._isScenario = false;
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-feedback').classList.remove('active');
+  document.getElementById('screen-form').classList.add('active');
+  if (typeof currentStep !== 'undefined') { currentStep = 1; showStep(1); }
+  document.getElementById('screen-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 
 
