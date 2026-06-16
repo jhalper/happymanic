@@ -858,6 +858,32 @@
 
   // ---------- What's New Panel ----------
   const CHANGELOG = [
+    { version: 'v1.9.6', date: '2026-06-16', changes: [
+      'Updated DLSS SR entry — DLSS 4.5 Ray Reconstruction 2nd gen transformer (Computex, May 31): 35% more compute, 20% more parameters, 27 launch titles including Alan Wake 2, Cyberpunk 2077, DOOM: The Dark Ages, Half-Life 2 RTX',
+      'Updated DLSS SR UE5 integration — official DLSS 4.5 plugin (May 31) adds native Dynamic MFG and 6X MFG support for Unreal Engine; no separate Streamline SDK integration required',
+      'Updated NVIDIA ACE entry — NVIGI SDK 1.6 (Computex, May 31): Qwen 3.5 4B (201 languages), Riva Parakeet TDT 600M ASR (25 languages), Chatterbox Multilingual 500M TTS (24 languages); first release with full on-device multilingual voice NPC pipeline',
+      'Updated NvRTX entry — rebased to UE 5.7.4 stable (May 31): fixes RTX Mega Geometry shader compilation, Substrate material compatibility, Opacity Micromap vegetation stability',
+      'Added lastUpdated field to all 83 tool entries — visible as cyan badge on every card',
+      'Added Recently Updated sort option to filter bar — sorts all tools by most recently updated entry'
+    ]},
+    { version: 'v1.9.5', date: '2026-05-01', changes: [
+      'Updated NVIDIA ACE entry — added Nemotron 3 Nano Omni (April 28): open multimodal model unifying vision, audio, and language; 30B params / 3B active (MoE); 9x throughput vs comparable open multimodal models; runs on single GPU',
+      'Updated RTX Neural Texture Compression (NTC) entry — SDK 0.9: BC7 encoding 6x faster vs 0.8, inference 20-40% faster, Inference on Feedback hybrid decode path added',
+      'NTC custom engine notes updated: CUDA 12.9 required for DX12 Cooperative Vectors path (CUDA 13 incompatible with 590.26 preview driver)'
+    ]},
+    { version: 'v1.9.4', date: '2026-04-24', changes: [
+      'Updated DLSS SR entry — DLSS 4.5 SDK released April 22 via Streamline SDK, Dynamic MFG now available for native game integration (not just NVIDIA app override)',
+      '6X MFG mode (5 AI-generated frames per rendered frame) documented — exclusive to RTX 50 Series; RTX 40 Series tops out at 4X Dynamic MFG',
+      'Enhanced Frame Generation model now in SDK — improves HUD/UI clarity at high frame multipliers',
+      'Limitations updated: Dynamic MFG native integration requires April 22 Streamline SDK; earlier versions do not expose Dynamic MFG'
+    ]},
+    { version: 'v1.9.3', date: '2026-04-16', changes: [
+      'Renamed to NVIDIA GameDev Guide — nav label updated to "NVIDIA GameDev", clearer independent positioning',
+      'Added non-affiliation disclosure: "Independent resource. Not affiliated with or endorsed by NVIDIA Corporation."',
+      'Added RTX Neural Shaders / Cooperative Vectors — new Rendering & Graphics entry covering NTC, NRC, and Neural Materials',
+      'DX12 Cooperative Vectors live in Agility SDK 1.717.x-preview — Tensor Cores accessible from HLSL shaders, cross-vendor',
+      'Tool count: 83 → 84'
+    ]},
     { version: 'v1.9.2', date: '2026-04-10', changes: [
       'Updated Omniverse entry — modular libraries (ovrtx, ovphysx, ovstorage) now in early access on GitHub/NGC',
       'Updated DLSS SR entry — Dynamic Multi Frame Generation confirmed live since March 31',
