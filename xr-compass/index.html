@@ -1,0 +1,691 @@
+<!--
+  XR MARKET COMPASS  .  tool 06 for gamedevai.guide
+  ............................................................................
+  Two boards for anyone entering the VR/MR/XR market:
+    1. PLATFORM STATE  .  which headset to build for, and which way it is moving
+    2. GENRE STATE     .  what kind of game to make, how it is trending, and
+                          how expensive it is to actually build
+  Every cell carries a confidence label so facts and inferences never blur.
+
+  HOW IT UPDATES
+  Both boards render from the PLATFORMS and GENRES arrays below. To wire the
+  nightly Claude Code scan, have it rewrite the fields that actually move
+  (platform `owner` and `store`, genre `trajectory` and `examples`), plus each
+  entry's `checked` date and the top-line DATA_AS_OF. Specs and build profiles
+  change rarely and can stay hand curated.
+
+  CONFIDENCE: 'confirmed' | 'reported' | 'estimated' | 'prelaunch'
+  PLATFORM VERDICT: 'rising' | 'stable' | 'declining' | 'wildcard'
+  GENRE TRAJECTORY: 'surging' | 'rising' | 'evergreen' | 'cooling'
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XR Market Compass . gamedevai.guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap');
+
+  :root{
+    --bg:#eef2f8;
+    --paper:#ffffff;
+    --paper-2:#f8fafc;
+    --line:#e3e9f1;
+    --line-strong:#d2dbe6;
+    --ink:#16203a;
+    --muted:#5d6b82;
+    --faint:#93a0b4;
+
+    --rising:#10a86a;
+    --stable:#2f7ff0;
+    --declining:#e3870b;
+    --wildcard:#8b4ff0;
+    --surging:#ea3a86;
+    --evergreen:#2f7ff0;
+    --cooling:#e3870b;
+
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --cond:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif;
+
+    --shadow:0 1px 2px rgba(22,32,58,.04), 0 8px 24px rgba(22,32,58,.06);
+    --shadow-sm:0 1px 2px rgba(22,32,58,.05), 0 2px 8px rgba(22,32,58,.05);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1100px 520px at 88% -8%, rgba(47,127,240,.10), transparent 60%),
+      radial-gradient(900px 480px at -5% 0%, rgba(234,58,134,.07), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:34px 20px 84px}
+
+  /* header */
+  .eyebrow{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);
+    display:flex;gap:9px;align-items:center;flex-wrap:wrap;
+  }
+  .eyebrow b{color:var(--muted);font-weight:600}
+  .eyebrow .dot{width:4px;height:4px;border-radius:50%;background:#c2cdda}
+  h1{
+    font-family:var(--cond);font-weight:700;
+    font-size:clamp(40px,8.5vw,72px);line-height:.94;letter-spacing:-.015em;
+    margin:14px 0 0;
+  }
+  h1 .x{
+    background:linear-gradient(95deg,var(--surging),var(--wildcard) 55%,var(--stable));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{margin:14px 0 0;max-width:64ch;color:var(--muted);font-size:15.5px}
+  .asof{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:15px;letter-spacing:.03em}
+  .asof span{color:var(--rising)}
+
+  /* tabs */
+  .tabs{display:flex;gap:6px;margin-top:26px;background:var(--paper-2);border:1px solid var(--line);
+    border-radius:13px;padding:5px;width:max-content;box-shadow:var(--shadow-sm)}
+  .tab{
+    font-family:var(--cond);font-weight:700;font-size:16px;letter-spacing:.01em;
+    border:0;background:transparent;color:var(--muted);padding:9px 20px;border-radius:9px;cursor:pointer;
+    transition:.15s;display:flex;align-items:center;gap:9px;
+  }
+  .tab .n{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--faint);
+    border:1px solid var(--line-strong);border-radius:999px;padding:1px 7px}
+  .tab[aria-selected="true"]{background:var(--ink);color:#fff;box-shadow:var(--shadow-sm)}
+  .tab[aria-selected="true"] .n{color:#fff;border-color:rgba(255,255,255,.4)}
+
+  /* legend */
+  .legend{
+    margin-top:20px;border:1px solid var(--line);border-radius:13px;background:var(--paper);
+    padding:14px 16px;display:grid;grid-template-columns:1.4fr 1fr;gap:14px 26px;box-shadow:var(--shadow-sm);
+  }
+  .legend h3{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 8px;font-weight:600}
+  .legend .row{display:flex;flex-wrap:wrap;gap:7px}
+  .key{font-family:var(--mono);font-size:11px;letter-spacing:.02em;display:inline-flex;align-items:center;
+    gap:6px;color:var(--muted);padding:3px 9px;border-radius:7px;border:1px solid var(--line);background:var(--paper-2)}
+  .key i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .conf{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:2px 8px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);white-space:nowrap;background:var(--paper-2)}
+  .conf.confirmed{color:#0f6b46;border-color:#bfe6d3;background:#e8f7ef}
+  .conf.reported{color:var(--muted)}
+  .conf.estimated{color:var(--faint);border-style:dashed}
+  .conf.prelaunch{color:var(--wildcard);border-color:#dccbfa;background:#f4effe}
+
+  /* controls */
+  .controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:26px 0 14px}
+  .controls .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+  .chip{font-family:var(--mono);font-size:12px;letter-spacing:.02em;background:var(--paper);
+    border:1px solid var(--line-strong);color:var(--muted);padding:6px 13px;border-radius:999px;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm)}
+  .chip:hover{color:var(--ink);border-color:#b4c1d2}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* board */
+  .board{border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--paper);box-shadow:var(--shadow)}
+  .board-head{display:grid;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);
+    font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);background:var(--paper-2)}
+  .board.platforms .board-head,.board.platforms .brow{grid-template-columns:18px 1.6fr 1fr 96px 70px}
+  .board.genres .board-head,.board.genres .brow{grid-template-columns:18px 1.5fr 1fr 96px 116px}
+  .brow{display:grid;gap:12px;padding:14px 18px;align-items:center;cursor:pointer;border-bottom:1px solid var(--line);
+    text-align:left;width:100%;background:transparent;color:inherit;font-family:inherit;transition:background .14s}
+  .brow:last-child{border-bottom:0}
+  .brow:hover{background:var(--paper-2)}
+  .brow:focus-visible{outline:2px solid var(--stable);outline-offset:-2px}
+  .spine{width:4px;height:34px;border-radius:3px;justify-self:center}
+  .bname{font-family:var(--cond);font-weight:700;font-size:19px;letter-spacing:.01em}
+  .bowner{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:1px;letter-spacing:.02em}
+  .bhead{color:var(--muted);font-size:13px}
+  .verdict{font-family:var(--mono);font-weight:600;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:6px}
+  .trend{font-size:14px;line-height:1}
+  .bcheck{font-family:var(--mono);font-size:10.5px;color:var(--faint);text-align:right;letter-spacing:.02em}
+
+  .v-rising{color:var(--rising)} .s-rising{background:var(--rising)}
+  .v-stable{color:var(--stable)} .s-stable{background:var(--stable)}
+  .v-declining{color:var(--declining)} .s-declining{background:var(--declining)}
+  .v-wildcard{color:var(--wildcard)} .s-wildcard{background:var(--wildcard)}
+  .v-surging{color:var(--surging)} .s-surging{background:var(--surging)}
+  .v-evergreen{color:var(--evergreen)} .s-evergreen{background:var(--evergreen)}
+  .v-cooling{color:var(--cooling)} .s-cooling{background:var(--cooling)}
+
+  /* cost meter */
+  .cost{display:inline-flex;align-items:center;gap:7px;justify-self:end}
+  .cost .seg{display:flex;gap:3px}
+  .cost .seg i{width:9px;height:9px;border-radius:2px;background:#dde4ee}
+  .cost .seg i.on{background:var(--ink)}
+  .cost .lv{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
+
+  /* cards */
+  .cards{margin-top:30px;display:flex;flex-direction:column;gap:13px}
+  .sec-lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin:0 0 2px}
+  .card{border:1px solid var(--line);border-radius:15px;overflow:hidden;background:var(--paper);box-shadow:var(--shadow-sm);transition:box-shadow .15s,transform .15s}
+  .card[open]{box-shadow:var(--shadow)}
+  .card-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;background:transparent;border:0;width:100%;text-align:left;color:inherit;font-family:inherit}
+  .card-head:focus-visible{outline:2px solid var(--stable);outline-offset:-2px}
+  .card-spine{width:4px;align-self:stretch;border-radius:3px;min-height:40px}
+  .card-id{font-family:var(--mono);font-size:11px;color:var(--faint);width:24px;flex:none}
+  .card-title{flex:1;min-width:0}
+  .card-title .nm{font-family:var(--cond);font-weight:700;font-size:22px;letter-spacing:.01em}
+  .card-meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.02em}
+  .card-meta .price{color:var(--ink)}
+  .caret{color:var(--faint);font-size:12px;transition:transform .2s;font-family:var(--mono)}
+  .card[open] .caret{transform:rotate(90deg)}
+  .card-body{padding:0 18px 20px;border-top:1px solid var(--line)}
+  .dim{display:grid;grid-template-columns:172px 1fr;gap:6px 18px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+  .dim:last-of-type{border-bottom:0}
+  .dim .k{font-family:var(--mono);font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);padding-top:2px}
+  .dim .v{font-size:14px;color:var(--ink)}
+  .dim .v .conf{margin-left:8px;vertical-align:1px}
+  .bottomline{margin-top:16px;padding:14px 16px;border-radius:11px;background:var(--paper-2);border:1px solid var(--line);font-size:14.5px;color:var(--ink)}
+  .bottomline b{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:5px;font-weight:600}
+
+  details>summary{list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+
+  /* opportunity map */
+  .map-wrap{border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:var(--shadow);padding:18px 18px 14px;margin-bottom:26px}
+  .map-title{font-family:var(--cond);font-weight:700;font-size:21px;margin:0 0 2px}
+  .map-sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;max-width:70ch}
+  .plot{position:relative;height:340px;margin:0 0 6px 8px;border-left:2px solid var(--line-strong);border-bottom:2px solid var(--line-strong);border-radius:2px}
+  .sweet{position:absolute;left:0;top:0;width:46%;height:54%;background:linear-gradient(135deg,rgba(16,168,106,.13),rgba(16,168,106,0));border-right:1px dashed rgba(16,168,106,.4);border-bottom:1px dashed rgba(16,168,106,.4);border-radius:2px 0 0 0}
+  .sweet span{position:absolute;left:10px;top:9px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#0f8a57;font-weight:600}
+  .dot{position:absolute;transform:translate(-50%,50%);display:flex;align-items:center;gap:6px;cursor:default}
+  .dot i{width:12px;height:12px;border-radius:50%;border:2px solid var(--paper);box-shadow:0 1px 3px rgba(22,32,58,.25);flex:none}
+  .dot b{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink);background:rgba(255,255,255,.82);padding:1px 5px;border-radius:5px;white-space:nowrap}
+  .axis-x,.axis-y{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .axis-x{text-align:center;margin-top:9px}
+  .axis-y{position:absolute;left:-12px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left;white-space:nowrap}
+
+  /* best path */
+  .bestpath{margin-top:8px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(180deg,#fff,var(--paper-2));box-shadow:var(--shadow);padding:20px 22px}
+  .bestpath .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--surging);font-weight:600}
+  .bestpath h3{font-family:var(--cond);font-weight:700;font-size:21px;margin:6px 0 10px}
+  .bestpath p{color:var(--muted);font-size:14.5px;margin:0 0 11px;max-width:76ch}
+  .bestpath p:last-child{margin-bottom:0}
+  .bestpath .pair{color:var(--ink);font-weight:600}
+  .bestpath ol{margin:0 0 11px;padding-left:20px;color:var(--muted);font-size:14.5px}
+  .bestpath ol li{margin:5px 0}
+  .bestpath ol li b{color:var(--ink)}
+
+  /* founder note */
+  .note{margin-top:34px;border:1px solid var(--line);border-radius:15px;
+    background:linear-gradient(180deg,#fff,var(--paper-2));box-shadow:var(--shadow);
+    padding:26px 28px 22px;position:relative;overflow:hidden}
+  .note::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:linear-gradient(180deg,var(--surging),var(--wildcard) 55%,var(--stable))}
+  .note .eyebrow{margin-bottom:0}
+  .note h3{font-family:var(--cond);font-weight:700;font-size:clamp(24px,4.4vw,32px);
+    letter-spacing:-.01em;margin:11px 0 15px}
+  .note p{color:#33415c;font-size:15px;line-height:1.62;margin:0 0 13px;max-width:74ch}
+  .note p.kicker{color:var(--ink);font-weight:600}
+  .note .sign{display:flex;align-items:center;gap:10px;margin-top:6px;padding-top:15px;
+    border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;
+    letter-spacing:.03em;color:var(--muted)}
+  .note .sign i{width:9px;height:9px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--surging),var(--stable))}
+
+  /* method */
+  .method{margin-top:34px;border:1px dashed var(--line-strong);border-radius:15px;padding:20px 22px;background:var(--paper)}
+  .method h3{font-family:var(--cond);font-weight:700;font-size:20px;margin:0 0 8px}
+  .method p{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch}
+  .method code{font-family:var(--mono);font-size:12.5px;background:var(--paper-2);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--ink)}
+  .foot{margin-top:24px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.02em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  .pane[hidden]{display:none}
+
+  @media(max-width:700px){
+    .board-head{display:none}
+    .board.platforms .brow,.board.genres .brow{grid-template-columns:14px 1fr auto;grid-template-areas:'s n v' 's o c';row-gap:3px;padding:13px 14px}
+    .brow .spine{grid-area:s;height:100%}
+    .brow .bcell-name{grid-area:n}
+    .brow .bcell-head{display:none}
+    .brow .bcell-verdict{grid-area:v;justify-self:end}
+    .brow .bcheck,.brow .cost{grid-area:c;justify-self:end}
+    .legend{grid-template-columns:1fr}
+    .dim{grid-template-columns:1fr;gap:3px}
+    .dim .k{padding-top:0}
+    .plot{height:300px}
+    .dot b{font-size:10px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .brow,.card{opacity:0;transform:translateY(6px);animation:rise .4s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+</style>
+
+<div class="wrap">
+
+  <div class="eyebrow">
+    <b>gamedevai.guide</b><span class="dot"></span>tool 06<span class="dot"></span>market intelligence
+  </div>
+  <h1><span class="x">XR</span> Market Compass</h1>
+  <p class="lede">Two reads for anyone deciding whether to enter VR right now: which platform to build for, and which kind of game to make. Scored against real decisions, with every cell labeled by how solid the signal is. No guarantees, only signals.</p>
+  <div class="asof">data as of <span>16 Jun 2026</span></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-pane="platforms">Platforms <span class="n">6</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-pane="genres">Genres <span class="n">10</span></button>
+  </div>
+
+  <!-- ===================== PLATFORMS ===================== -->
+  <section class="pane" id="pane-platforms">
+    <div class="legend">
+      <div>
+        <h3>Verdict</h3>
+        <div class="row">
+          <span class="key"><i class="s-rising"></i>Rising</span>
+          <span class="key"><i class="s-stable"></i>Stable</span>
+          <span class="key"><i class="s-declining"></i>Declining</span>
+          <span class="key"><i class="s-wildcard"></i>Wildcard</span>
+        </div>
+      </div>
+      <div>
+        <h3>Signal confidence</h3>
+        <div class="row">
+          <span class="conf confirmed">Confirmed</span>
+          <span class="conf reported">Reported</span>
+          <span class="conf estimated">Estimated</span>
+          <span class="conf prelaunch">Pre-launch</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls" data-filters="platforms">
+      <span class="lab">Filter</span>
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="rising" aria-pressed="false">Rising</button>
+      <button class="chip" data-f="stable" aria-pressed="false">Stable</button>
+      <button class="chip" data-f="declining" aria-pressed="false">Declining</button>
+      <button class="chip" data-f="wildcard" aria-pressed="false">Wildcard</button>
+    </div>
+
+    <div class="board platforms" id="board-platforms">
+      <div class="board-head">
+        <span></span><span>Platform</span><span>Read</span><span>Verdict</span><span style="text-align:right">Checked</span>
+      </div>
+    </div>
+
+    <div class="cards" id="cards-platforms">
+      <div class="sec-lab">Detail . tap any platform to open</div>
+    </div>
+  </section>
+
+  <!-- ===================== GENRES ===================== -->
+  <section class="pane" id="pane-genres" hidden>
+    <div class="legend">
+      <div>
+        <h3>Trajectory</h3>
+        <div class="row">
+          <span class="key"><i class="s-surging"></i>Surging</span>
+          <span class="key"><i class="s-rising"></i>Rising</span>
+          <span class="key"><i class="s-evergreen"></i>Evergreen</span>
+          <span class="key"><i class="s-cooling"></i>Cooling</span>
+        </div>
+      </div>
+      <div>
+        <h3>Build cost</h3>
+        <div class="row">
+          <span class="key"><span class="cost"><span class="seg"><i class="on"></i><i></i><i></i><i></i></span></span>Low</span>
+          <span class="key"><span class="cost"><span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span>Very high</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-wrap">
+      <h2 class="map-title">The opportunity map</h2>
+      <p class="map-sub">Momentum against build cost. The green corner is the sweet spot: genres that are trending up and stay cheap to produce. The bottom right is where ambition gets expensive and the market is shrinking.</p>
+      <div class="plot" id="plot">
+        <div class="sweet"><span>Sweet spot</span></div>
+        <span class="axis-y">Cooling &nbsp;to&nbsp; Surging</span>
+      </div>
+      <div class="axis-x">Cheaper to build &nbsp;&rarr;&nbsp; Costlier to build</div>
+    </div>
+
+    <div class="controls" data-filters="genres">
+      <span class="lab">Filter</span>
+      <button class="chip" data-f="all" aria-pressed="true">All</button>
+      <button class="chip" data-f="surging" aria-pressed="false">Surging</button>
+      <button class="chip" data-f="rising" aria-pressed="false">Rising</button>
+      <button class="chip" data-f="evergreen" aria-pressed="false">Evergreen</button>
+      <button class="chip" data-f="cooling" aria-pressed="false">Cooling</button>
+    </div>
+
+    <div class="board genres" id="board-genres">
+      <div class="board-head">
+        <span></span><span>Genre</span><span>Read</span><span>Trajectory</span><span style="text-align:right">Build cost</span>
+      </div>
+    </div>
+
+    <div class="cards" id="cards-genres">
+      <div class="sec-lab">Detail . tap any genre to open</div>
+    </div>
+
+    <div class="bestpath">
+      <span class="tag">The honest read</span>
+      <h3>Best path right now</h3>
+      <p>The VR catalog is evergreen locked and unforgiving to new paid games. Across all of 2025, only about four VR only paid titles passed 100,000 copies on Steam, and not one 2026 release has cracked the Quest top 50. Two realistic paths remain for a newcomer:</p>
+      <ol>
+        <li><b>A cheap, VR native novelty.</b> A sharp quirky sim at the $10 to $20 price point, or a co-op horror title with a distinct hook. Low cost, fast, concept driven. The best risk adjusted bet.</li>
+        <li><b>A social or physics F2P hook.</b> Aimed at the teen social audience. The highest ceiling in VR, but it is a live service company and a virality lottery, not a project.</li>
+      </ol>
+      <p>Everything else (AAA narrative, competitive shooters, fitness subscriptions) is capital intensive, exposed to platform retreat, or both. Whichever genre you pick, pair it with a cross platform plan given how small each base is.</p>
+      <p class="pair">Pinpointed path: build for Quest 3 and 3S plus SteamVR for reach, and make a quirky VR native sim or a co-op horror title with one strong original hook.</p>
+    </div>
+  </section>
+
+  <div class="note">
+    <div class="eyebrow"><b>Built by a developer, for developers</b></div>
+    <h3>Why this exists</h3>
+    <p>I have spent more than 25 years building and releasing games and simulations across consoles, PC, VR, XR, and proprietary hardware. I have shipped award winning titles with teams that ranged from a handful of people to several hundred, and I have founded and run studios along the way.</p>
+    <p>In 2024 I released Nope Challenge, a VR passion project. I was not chasing a blockbuster. I was chasing something I genuinely wanted to make, and it taught me more as a developer, designer, manager, and creative lead than almost any project before it. It reviewed well. But reviews do not make payroll, and even a passion project needs enough sales to keep a team fed and working.</p>
+    <p>That is the real problem this tool solves. VR is a wild, narrow market kept alive by a small group of genuinely great people. I have a long list of ideas I believe would be a joy to build and could reach a far wider audience than most VR titles ever do. The hard part is not the idea. It is the path. Which platform, which genre, which bet actually brings in enough to support a healthy small team without risking the studio.</p>
+    <p class="kicker">So I built a compass. Something that cuts through the noise and points at the next sound move. If it helps me choose well, it should help you choose well too. That is the whole point.</p>
+    <div class="sign"><i></i>Founder, Happy Manic LLC &nbsp;.&nbsp; gamedevai.guide</div>
+  </div>
+
+  <div class="foot">
+    <span>Happy Manic LLC . gamedevai.guide</span>
+    <span id="count"></span>
+  </div>
+</div>
+
+<script>
+const DATA_AS_OF = "16 Jun 2026";
+
+const PLATFORMS = [
+  { id:"01", name:"Meta Quest 3 / 3S", owner:"Meta", price:"$499 / $299", verdict:"declining", trend:"\u2198", checked:"16 Jun",
+    head:"Biggest base, owner drifting to glasses",
+    dims:{
+      install:{v:"Largest standalone install base by a wide margin, though headset shipments are reported down about 16% year over year. No official unit figures.", c:"estimated"},
+      store:{v:"Horizon Store, roughly 30% revenue share. Curated main store with a concept approval gate. App Lab and sideloading act as side doors for discovery.", c:"reported"},
+      dev:{v:"Horizon OS (Android based), OpenXR, full Unity and Unreal support. Quest 3 runs Snapdragon XR2 Gen 2. Strong color passthrough, hand tracking, mixed reality.", c:"confirmed"},
+      owner:{v:"Declining for VR gaming. Roughly 1,500 Reality Labs roles cut in January 2026, internal VR studios closed, Horizon OS sharing paused, the Phoenix headset pushed to 2027. Capital is moving to AI smart glasses.", c:"reported"},
+      regional:{v:"Broad global availability, including the US.", c:"confirmed"}
+    },
+    bottom:"Still where the players are, but you would be building on a platform whose owner is visibly reallocating to glasses. Excellent reach today, shrinking first party content and discovery investment. Treat it as a reach play, not a growth bet." },
+
+  { id:"02", name:"Valve Steam Frame", owner:"Valve", price:"~$800 to $1,000 est.", verdict:"rising", trend:"\u2197", checked:"16 Jun",
+    head:"Best economics, open platform, ships summer 2026",
+    dims:{
+      install:{v:"Zero today, ships summer 2026. Inherits Steam's huge PC base and existing SteamVR users, but a real headset install base is unproven and the premium price caps volume.", c:"prelaunch"},
+      store:{v:"Steam's standard split (30%, dropping to 25% then 20% at revenue tiers). Open platform, no concept approval gate, full Proton compatibility. The friendliest economics of the group.", c:"confirmed"},
+      dev:{v:"SteamOS (Arch Linux), Proton plus FEX-Emu, native ARM64 and Android APKs. Steam Frame Verified sets a 90 FPS standalone target, a concrete line to build against. Eye tracking and foveated rendering.", c:"confirmed"},
+      owner:{v:"Rising. Fresh hardware entry shipping summer 2026 alongside Steam Machine and a new Controller, with an active Verified developer program.", c:"confirmed"},
+      regional:{v:"Available wherever Steam operates.", c:"confirmed"}
+    },
+    bottom:"The strongest store terms and the only open platform here, with a clear performance target. The whole bet rides on whether the install base shows up. Premium pricing means it will not be a volume play at launch, but it is the cleanest platform to develop for." },
+
+  { id:"03", name:"Samsung Galaxy XR", owner:"Samsung . Google . Qualcomm", price:"$1,799", verdict:"rising", trend:"\u2197", checked:"16 Jun",
+    head:"Android XR's first device, ecosystem is the story",
+    dims:{
+      install:{v:"New, launched October 2025 in the US and Korea. Analysts project north of 100,000 units in 2026. Small, but the first device on a platform with real ecosystem reach, expanding to more markets through 2026.", c:"reported"},
+      store:{v:"Google Play on Android XR, with 50 plus apps at launch (Adobe, MLB, Fox Sports). Standard Play economics and a large existing Android developer base.", c:"confirmed"},
+      dev:{v:"Android XR, ARCore, Android Studio, Jetpack Compose, Unity, OpenXR. Snapdragon XR2 plus Gen 2, 4.3K micro OLED passthrough, Gemini AI built in.", c:"confirmed"},
+      owner:{v:"Rising. Strategic Samsung, Google and Qualcomm platform with multiple Android XR devices and glasses planned. Enterprise is a primary target alongside consumer.", c:"reported"},
+      regional:{v:"US and Korea now, more markets rolling out in 2026.", c:"reported"}
+    },
+    bottom:"The long game. This single $1,799 headset is not the audience. Android XR's distribution reach and Gemini integration are. Tiny install base today, but the platform with the most ecosystem weight behind it. Worth tracking even if you do not build yet." },
+
+  { id:"04", name:"PICO 4 Ultra to Project Swan", owner:"ByteDance", price:"~$549 / Swan TBD", verdict:"wildcard", trend:"\u2197", checked:"16 Jun",
+    head:"Funded wildcard making a premium global push",
+    dims:{
+      install:{v:"Modest, concentrated in China, Asia and Europe, historically absent from the US. No reliable public figures.", c:"estimated"},
+      store:{v:"PICO Store, smaller catalog than Quest or Steam, revenue share broadly comparable to peers. A separate GameTop, Steam style store has been reported.", c:"reported"},
+      dev:{v:"Pico OS 6 with Spatial Engine, XR2 Gen 2 on the 4 Ultra. Project Swan adds a self developed chip and roughly 4000 PPI micro OLED. Unity, Unreal, OpenXR.", c:"reported"},
+      owner:{v:"Rising. ByteDance is funding a premium repositioning. Project Swan targets a late 2026 global launch including the US, a real signal of intent to compete outside Asia.", c:"reported"},
+      regional:{v:"China, Asia and EU today, with US expansion targeted for late 2026.", c:"reported"}
+    },
+    bottom:"The deep pocketed wildcard. A credible US entry plus premium hardware could open a genuine second platform, but catalog, distribution and Western demand are all unproven. High upside, high uncertainty. Watch the Swan launch closely." },
+
+  { id:"05", name:"Sony PSVR2", owner:"Sony", price:"$549.99", verdict:"declining", trend:"\u2198", checked:"16 Jun",
+    head:"Great hardware, fading first party commitment",
+    dims:{
+      install:{v:"Sluggish, with production reportedly paused over unsold inventory. A PS5 tethered base plus new PC users reachable through the official adapter.", c:"reported"},
+      store:{v:"PS Store with console style certification and QA, a higher barrier to ship. The PC route runs through SteamVR instead.", c:"reported"},
+      dev:{v:"PS5 dev kit and console certification for native titles, OLED, eye tracking, haptics. PC VR supported via Sony's official adapter (SteamVR).", c:"confirmed"},
+      owner:{v:"Wavering. Sony reportedly made deep cuts to first party VR funding, with only a couple of titles in development. The PC adapter reads as a release valve, not a growth strategy.", c:"reported"},
+      regional:{v:"Global, across PS5 markets.", c:"confirmed"}
+    },
+    bottom:"Excellent hardware attached to a fading platform commitment. Its real relevance now is as another SteamVR headset. Target it through PC VR rather than as a first party PS5 bet." },
+
+  { id:"06", name:"Apple Vision Pro", owner:"Apple", price:"$3,499", verdict:"wildcard", trend:"\u2192", checked:"16 Jun",
+    head:"Highest fidelity, smallest game audience",
+    dims:{
+      install:{v:"Small, held back by a premium price and limited consumer traction. No official figures.", c:"estimated"},
+      store:{v:"visionOS App Store with Apple's standard cut and strict review.", c:"confirmed"},
+      dev:{v:"visionOS, Swift and RealityKit, Unity PolySpatial. Hand and eye input, no controllers. Best in class display fidelity.", c:"confirmed"},
+      owner:{v:"Declining for the current device. The Vision Pro team was reportedly disbanded and engineers moved to AI glasses. A cheaper, lighter model is rumored for the 2026 to 2027 window.", c:"reported"},
+      regional:{v:"US plus a handful of additional markets.", c:"confirmed"}
+    },
+    bottom:"Unmatched fidelity, the smallest gaming audience, and an owner pivoting to glasses. Niche premium or experiential bets only, until a cheaper device and a clearer roadmap arrive. Park it on the watchlist." }
+];
+
+const GENRES = [
+  { id:"01", name:"Social / physics F2P", short:"Social F2P", trajectory:"surging", trend:"\u2197", checked:"16 Jun",
+    head:"The commercial engine of VR. Winner take most.", cost:3, costLabel:"High to sustain",
+    team:"1 to 6 to start, grows fast", budget:"Low to build, high to run", timeline:"Fast to a playable build, then endless live ops",
+    hardest:"A genuinely novel VR native movement or social hook, plus running a free to play live service: servers, cosmetics, moderation, and constant content. Virality is the real dependency and it cannot be bought.",
+    examples:"Gorilla Tag ($100M plus, 1 in 3 Quest owners, 119k concurrent record in 2026), Animal Company, Yeeps, Scary Baboon",
+    map:{x:60,y:92},
+    bottom:"The highest ceiling in VR and the closest thing to a breakout lottery. The build can start as a one person prototype, but sustaining a hit is a live ops company, not a project. Network effects mean late entrants fight uphill against entrenched communities." },
+
+  { id:"02", name:"Quirky first person sim / novelty", short:"Quirky sim", trajectory:"surging", trend:"\u2197", checked:"16 Jun",
+    head:"Cheap, concept driven, and the charts love it.", cost:1, costLabel:"Low",
+    team:"1 to 4", budget:"Low, titles sell at $10 to $20", timeline:"Weeks to a few months",
+    hardest:"Finding a sharp, funny, instantly readable concept that is VR native. Execution is modest, so the idea and the polish are everything.",
+    examples:"I Am Cat (estimated $100M plus gross), I Am Security, Thrill of the Fight 2, I Am Bird",
+    map:{x:25,y:88},
+    bottom:"The best risk adjusted entry for a small paid game team. Cheap to build, sells at $10 to $20, and the charts reward a clever single hook over scope. These live or die on concept and word of mouth, not budget." },
+
+  { id:"03", name:"Co-op / mascot horror", short:"Co-op horror", trajectory:"rising", trend:"\u2197", checked:"16 Jun",
+    head:"Immersion does the heavy lifting. Small teams thrive.", cost:2, costLabel:"Low to moderate",
+    team:"2 to 6", budget:"Low to moderate", timeline:"A few months to a year",
+    hardest:"Atmosphere and audio carry it, which keeps art budgets sane, but co-op netcode and replayability add real engineering. The low end is getting crowded, so a distinct hook matters.",
+    examples:"Phasmophobia style co-op, mascot horror, the wave of Gorilla Tag horror titles",
+    map:{x:38,y:74},
+    bottom:"A genre where VR's core strength, presence and fear, gives small teams an edge. Co-op multiplayer is the durable form. The challenge is standing out as the shelf fills up." },
+
+  { id:"04", name:"Rhythm / music", short:"Rhythm", trajectory:"evergreen", trend:"\u2192", checked:"16 Jun",
+    head:"Proven and durable, but Beat Saber owns the room.", cost:2, costLabel:"Moderate",
+    team:"2 to 6", budget:"Moderate, music licensing is the real cost", timeline:"Several months",
+    hardest:"Licensing music is expensive and slow. Competing with an entrenched leader for mindshare is harder than the build itself.",
+    examples:"Beat Saber (still charting years on), Pistol Whip, Synth Riders",
+    map:{x:35,y:40},
+    bottom:"Comfortable to play and proven to retain, but the category is mature and licensing plus an incumbent giant make it a tough place to break in new. Only build here with a genuinely fresh mechanic." },
+
+  { id:"05", name:"Fitness", short:"Fitness", trajectory:"cooling", trend:"\u2198", checked:"16 Jun",
+    head:"Real demand, but platform turmoil hit the leaders.", cost:3, costLabel:"Moderate to high",
+    team:"4 to 10", budget:"Moderate to high, content plus often a subscription", timeline:"Many months",
+    hardest:"Subscription content treadmills are expensive to keep fed, and the category leaned on Meta, whose pullback and Supernatural's uncertainty cooled the space.",
+    examples:"Supernatural (facing uncertainty), Les Mills bodycombat, FitXR",
+    map:{x:45,y:35},
+    bottom:"A genuine use case, but a content hungry subscription model and direct exposure to Meta's retreat make it a risky bet for a newcomer right now." },
+
+  { id:"06", name:"Physics sandbox / melee", short:"Sandbox", trajectory:"evergreen", trend:"\u2192", checked:"16 Jun",
+    head:"Beloved and sticky, but deep engineering.", cost:4, costLabel:"High",
+    team:"6 to 15", budget:"High", timeline:"A year plus",
+    hardest:"Believable physics and combat systems are among the hardest engineering in VR. Modding extends a title's life but raises the quality bar.",
+    examples:"Blade & Sorcery: Nomad, Bonelab, both constantly in the charts",
+    map:{x:80,y:50},
+    bottom:"Evergreen and adored, but the systems work is brutal. Only worth it with serious engineering muscle and a modding strategy. Not a first project." },
+
+  { id:"07", name:"Competitive / team shooters", short:"Shooters", trajectory:"evergreen", trend:"\u2192", checked:"16 Jun",
+    head:"Durable communities, expensive to run.", cost:4, costLabel:"High to very high",
+    team:"8 to 20 plus", budget:"High to very high", timeline:"A year plus, then live ops",
+    hardest:"Netcode, anti cheat, balance, and a constant content cadence. Established incumbents already own the player base.",
+    examples:"Pavlov (and Pavlov Shack), Onward, Contractors, Population One",
+    map:{x:85,y:48},
+    bottom:"Loyal audiences, but this is a live service commitment with hard netcode and entrenched leaders. A capital and team intensive bet, not an indie entry." },
+
+  { id:"08", name:"Action / adventure narrative (AAA)", short:"AAA narrative", trajectory:"cooling", trend:"\u2198", checked:"16 Jun",
+    head:"The benchmark genre, but the funding dried up.", cost:4, costLabel:"Very high",
+    team:"20 to 60 plus", budget:"Very high", timeline:"Multiple years",
+    hardest:"Huge content volume and a high fidelity bar, with the platform money (mainly Meta) that once funded these now pulling back.",
+    examples:"Half-Life: Alyx (the high bar), Asgard's Wrath 2, Behemoth",
+    map:{x:95,y:22},
+    bottom:"Artistically the peak of VR, commercially the worst risk for a newcomer. Long, costly, and the publishers who bankrolled these are retreating. Avoid unless funded and staffed for it." },
+
+  { id:"09", name:"Vehicle sim (flight / space / racing)", short:"Vehicle sim", trajectory:"evergreen", trend:"\u2192", checked:"16 Jun",
+    head:"Small, loyal, and comfort caps the design.", cost:3, costLabel:"Moderate",
+    team:"1 to 8 (a solo dev built VTOL VR)", budget:"Moderate", timeline:"Long and systems heavy",
+    hardest:"Deep simulation systems plus motion comfort constraints. Fast racing especially fights nausea, which shrinks the audience.",
+    examples:"VTOL VR (one person dev), Elite Dangerous VR, Gran Turismo 7 VR",
+    map:{x:60,y:42},
+    bottom:"A devoted niche that can reward deep expertise, even solo, but comfort limits and a small audience cap the upside. Specialist territory." },
+
+  { id:"10", name:"Puzzle / escape room", short:"Puzzle", trajectory:"cooling", trend:"\u2198", checked:"16 Jun",
+    head:"Achievable scope, but momentum is fading.", cost:2, costLabel:"Low to moderate",
+    team:"2 to 6", budget:"Low to moderate", timeline:"Several months",
+    hardest:"Design and polish over technology. The challenge is commercial: high action and novelty titles are pushing chill puzzlers down the charts.",
+    examples:"I Expect You To Die, Red Matter, Ghost Town",
+    map:{x:30,y:33},
+    bottom:"Friendly scope for a small team and lovely when polished, but the audience's attention is drifting toward action and novelty. Build for love of the craft, with modest revenue expectations." }
+];
+
+/* ---------- helpers ---------- */
+function confTag(c){
+  const label={confirmed:'Confirmed',reported:'Reported',estimated:'Estimated',prelaunch:'Pre-launch'}[c];
+  return `<span class="conf ${c}">${label}</span>`;
+}
+function costMeter(level){
+  let s='';for(let i=1;i<=4;i++){s+=`<i class="${i<=level?'on':''}"></i>`;}
+  return `<span class="cost"><span class="seg">${s}</span></span>`;
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* ---------- render platforms ---------- */
+const PDIMS={install:"Install base & momentum",store:"Store economics",dev:"Dev requirements",owner:"Owner commitment",regional:"Regional reach"};
+const boardP=document.getElementById('board-platforms');
+const cardsP=document.getElementById('cards-platforms');
+
+PLATFORMS.forEach((p,i)=>{
+  const v=p.verdict;
+  const row=document.createElement('button');
+  row.className='brow';row.dataset.verdict=v;row.style.animationDelay=(i*42)+'ms';
+  row.innerHTML=`
+    <span class="spine s-${v}"></span>
+    <span class="bcell-name"><span class="bname">${p.name}</span><span class="bowner">${p.owner}</span></span>
+    <span class="bcell-head bhead">${p.head}</span>
+    <span class="bcell-verdict"><span class="verdict v-${v}"><span class="trend">${p.trend}</span>${v}</span></span>
+    <span class="bcheck">${p.checked}</span>`;
+  row.addEventListener('click',()=>openCard('card-p-'+p.id));
+  boardP.appendChild(row);
+
+  const card=document.createElement('details');
+  card.className='card';card.id='card-p-'+p.id;card.dataset.verdict=v;card.style.animationDelay=(100+i*42)+'ms';
+  let dims='';
+  for(const k of ['install','store','dev','owner','regional']){
+    dims+=`<div class="dim"><div class="k">${PDIMS[k]}</div><div class="v">${p.dims[k].v}${confTag(p.dims[k].c)}</div></div>`;
+  }
+  card.innerHTML=`
+    <summary class="card-head">
+      <span class="card-spine s-${v}"></span><span class="card-id">${p.id}</span>
+      <span class="card-title"><span class="nm">${p.name}</span>
+        <span class="card-meta"><span class="price">${p.price}</span> . ${p.owner} . <span class="v-${v}">${cap(v)} ${p.trend}</span></span></span>
+      <span class="caret">&#9654;</span>
+    </summary>
+    <div class="card-body">${dims}<div class="bottomline"><b>Bottom line for devs</b>${p.bottom}</div></div>`;
+  cardsP.appendChild(card);
+});
+
+/* ---------- render genres ---------- */
+const boardG=document.getElementById('board-genres');
+const cardsG=document.getElementById('cards-genres');
+
+GENRES.forEach((g,i)=>{
+  const t=g.trajectory;
+  const row=document.createElement('button');
+  row.className='brow';row.dataset.verdict=t;row.style.animationDelay=(i*38)+'ms';
+  row.innerHTML=`
+    <span class="spine s-${t}"></span>
+    <span class="bcell-name"><span class="bname">${g.name}</span></span>
+    <span class="bcell-head bhead">${g.head}</span>
+    <span class="bcell-verdict"><span class="verdict v-${t}"><span class="trend">${g.trend}</span>${t}</span></span>
+    ${costMeter(g.cost)}`;
+  row.addEventListener('click',()=>openCard('card-g-'+g.id));
+  boardG.appendChild(row);
+
+  const card=document.createElement('details');
+  card.className='card';card.id='card-g-'+g.id;card.dataset.verdict=t;card.style.animationDelay=(100+i*38)+'ms';
+  card.innerHTML=`
+    <summary class="card-head">
+      <span class="card-spine s-${t}"></span><span class="card-id">${g.id}</span>
+      <span class="card-title"><span class="nm">${g.name}</span>
+        <span class="card-meta"><span class="v-${t}">${cap(t)} ${g.trend}</span> . build cost ${g.costLabel}</span></span>
+      <span class="caret">&#9654;</span>
+    </summary>
+    <div class="card-body">
+      <div class="dim"><div class="k">What is moving</div><div class="v">${g.examples}</div></div>
+      <div class="dim"><div class="k">Team size</div><div class="v">${g.team}</div></div>
+      <div class="dim"><div class="k">Budget band</div><div class="v">${g.budget}</div></div>
+      <div class="dim"><div class="k">Time to ship</div><div class="v">${g.timeline}</div></div>
+      <div class="dim"><div class="k">Hardest part</div><div class="v">${g.hardest}</div></div>
+      <div class="bottomline"><b>Bottom line for devs</b>${g.bottom}</div>
+    </div>`;
+  cardsG.appendChild(card);
+});
+
+/* ---------- opportunity map ---------- */
+const plot=document.getElementById('plot');
+GENRES.forEach(g=>{
+  const d=document.createElement('div');
+  d.className='dot';
+  d.style.left=g.map.x+'%';
+  d.style.bottom=g.map.y+'%';
+  d.style.transform='translate(-50%,50%)';
+  d.innerHTML=`<i class="s-${g.trajectory}"></i><b>${g.short}</b>`;
+  plot.appendChild(d);
+});
+
+/* ---------- card open + scroll ---------- */
+function openCard(id){
+  const card=document.getElementById(id);
+  if(!card)return;
+  card.open=true;
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+  card.querySelector('summary').focus({preventScroll:true});
+}
+
+/* ---------- tabs ---------- */
+const tabs=document.querySelectorAll('.tab');
+tabs.forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tabs.forEach(t=>t.setAttribute('aria-selected','false'));
+    tab.setAttribute('aria-selected','true');
+    document.getElementById('pane-platforms').hidden = tab.dataset.pane!=='platforms';
+    document.getElementById('pane-genres').hidden = tab.dataset.pane!=='genres';
+    updateCount(tab.dataset.pane);
+  });
+});
+
+/* ---------- filters ---------- */
+function wireFilters(scope){
+  const bar=document.querySelector(`[data-filters="${scope}"]`);
+  bar.addEventListener('click',e=>{
+    const btn=e.target.closest('.chip');if(!btn)return;
+    bar.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+    btn.setAttribute('aria-pressed','true');
+    const f=btn.dataset.f;
+    const board=document.getElementById('board-'+scope);
+    const cards=document.getElementById('cards-'+scope);
+    [...board.querySelectorAll('.brow'),...cards.querySelectorAll('.card')].forEach(el=>{
+      el.style.display=(f==='all'||el.dataset.verdict===f)?'':'none';
+    });
+    updateCount(scope);
+  });
+}
+wireFilters('platforms');
+wireFilters('genres');
+
+function updateCount(scope){
+  const board=document.getElementById('board-'+scope);
+  const rows=[...board.querySelectorAll('.brow')];
+  const shown=rows.filter(r=>r.style.display!=='none').length;
+  const noun=scope==='platforms'?'platforms':'genres';
+  document.getElementById('count').textContent=shown+' of '+rows.length+' '+noun;
+}
+updateCount('platforms');
+</script>
