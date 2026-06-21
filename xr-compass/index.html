@@ -51,7 +51,7 @@
   }
 
   *{box-sizing:border-box}
-  html,body{margin:0}
+  html,body{margin:0;overflow-x:hidden}
   body{
     background:
       radial-gradient(1100px 520px at 88% -8%, rgba(47,127,240,.10), transparent 60%),
@@ -74,7 +74,7 @@
   .eyebrow .dot{width:4px;height:4px;border-radius:50%;background:#c2cdda}
   h1{
     font-family:var(--cond);font-weight:700;
-    font-size:clamp(40px,8.5vw,72px);line-height:.94;letter-spacing:-.015em;
+    font-size:clamp(34px,8vw,72px);line-height:.94;letter-spacing:-.015em;
     margin:14px 0 0;
   }
   h1 .x{
@@ -199,6 +199,8 @@
   .axis-x,.axis-y{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
   .axis-x{text-align:center;margin-top:9px}
   .axis-y{position:absolute;left:-12px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left;white-space:nowrap}
+  .plot-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .plot-hint{display:none}
 
   /* best path */
   .bestpath{margin-top:8px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(180deg,#fff,var(--paper-2));box-shadow:var(--shadow);padding:20px 22px}
@@ -210,6 +212,78 @@
   .bestpath ol{margin:0 0 11px;padding-left:20px;color:var(--muted);font-size:14.5px}
   .bestpath ol li{margin:5px 0}
   .bestpath ol li b{color:var(--ink)}
+
+  /* evaluate */
+  .eval-intro{border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:var(--shadow-sm);padding:20px 22px;margin-bottom:18px}
+  .eval-title{font-family:var(--cond);font-weight:700;font-size:22px;margin:0 0 8px}
+  .eval-intro p{color:var(--muted);font-size:14px;margin:0;max-width:78ch}
+  .eval-form{display:grid;grid-template-columns:repeat(2,1fr);gap:13px 16px;margin-bottom:20px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.wide{grid-column:1 / -1}
+  .field label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .field select,.field input{font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line-strong);border-radius:9px;padding:10px 11px;box-shadow:var(--shadow-sm)}
+  .field select:focus,.field input:focus{outline:none;border-color:var(--stable);box-shadow:0 0 0 3px rgba(47,127,240,.15)}
+  .eval-actions{margin-top:2px}
+  .eval-btn{font-family:var(--cond);font-weight:700;font-size:16px;background:var(--ink);color:#fff;border:0;
+    border-radius:11px;padding:13px 24px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s}
+  .eval-btn:hover{transform:translateY(-1px)}
+  .eval-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .verdict-pill{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 13px;border-radius:999px;color:#fff}
+  .verdict-pill.p-rising{background:var(--rising)}
+  .verdict-pill.p-surging{background:var(--surging)}
+  .verdict-pill.p-stable{background:var(--stable)}
+  .verdict-pill.p-declining{background:var(--declining)}
+  .eval-name{font-family:var(--cond);font-weight:700;font-size:21px}
+  .eval-bands{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+  .eval-summary{font-size:15px;color:var(--ink);margin:0 0 6px;padding:13px 16px;background:var(--paper-2);
+    border:1px solid var(--line);border-radius:11px}
+  .ev-plot{margin-top:16px}
+  .dot.ev-ref i{width:9px;height:9px;opacity:.45}
+  .dot.ev-ref b{opacity:.5;font-size:10px;background:rgba(255,255,255,.7);font-weight:400}
+  .dot.ev-concept i{width:18px;height:18px;border:3px solid var(--paper);box-shadow:0 2px 8px rgba(22,32,58,.35)}
+  .dot.ev-concept b{font-weight:700;font-size:12px;background:var(--ink);color:#fff;padding:2px 8px}
+  .dot.ev-concept{z-index:5}
+  .read-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .read-col{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--paper)}
+  .read-col h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;margin:0 0 9px}
+  .read-col.help h4{color:var(--rising)}
+  .read-col.hurt h4{color:var(--declining)}
+  .read-col ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+  .read-col li{margin:5px 0}
+  .tips{margin-top:14px;border:1px solid var(--line-strong);border-radius:12px;padding:15px 17px;
+    background:linear-gradient(180deg,#fff,var(--paper-2))}
+  .tips h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--surging);margin:0 0 9px}
+  .tips ul{margin:0;padding-left:18px;color:var(--ink);font-size:14px}
+  .tips li{margin:6px 0}
+  @media(max-width:700px){.eval-form{grid-template-columns:1fr}.read-cols{grid-template-columns:1fr}}
+  .eval-empty{border:1px dashed var(--line-strong);border-radius:13px;padding:30px 22px;text-align:center;
+    color:var(--muted);font-size:14.5px;background:var(--paper-2)}
+  .eval-empty b{color:var(--ink)}
+  .reach-note{margin-top:12px;padding:13px 16px;border-radius:11px;border:1px solid var(--line);font-size:14px;color:var(--ink)}
+  .reach-note .reach-tag{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:5px;font-weight:600}
+  .reach-note b{font-weight:700}
+  .reach-note.reach-broad{background:#eef7f1;border-color:#cfe8da}
+  .reach-note.reach-broad .reach-tag{color:var(--rising)}
+  .reach-note.reach-capped{background:#fdf4e7;border-color:#f3e0bf}
+  .reach-note.reach-capped .reach-tag{color:var(--declining)}
+
+  /* sources */
+  .src-intro{border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:var(--shadow-sm);padding:20px 22px;margin-bottom:18px}
+  .src-title{font-family:var(--cond);font-weight:700;font-size:22px;margin:0 0 8px}
+  .src-intro p{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch}
+  .src-intro p:last-child{margin-bottom:0}
+  .src-how b{color:var(--ink)}
+  .src-group{margin-bottom:18px}
+  .src-group h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin:0 0 6px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .src-item{display:grid;grid-template-columns:132px 1fr;gap:6px 16px;padding:10px 0;align-items:baseline;border-bottom:1px solid var(--line)}
+  .src-item:last-child{border-bottom:0}
+  .src-item .topic{font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;color:var(--ink);font-weight:500}
+  .src-item .ref a{color:var(--stable);text-decoration:none;font-size:14px;font-weight:500}
+  .src-item .ref a:hover{text-decoration:underline}
+  .src-item .ref .meta{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;letter-spacing:.02em}
+  @media(max-width:700px){.src-item{grid-template-columns:1fr;gap:2px}}
 
   /* founder note */
   .note{margin-top:34px;border:1px solid var(--line);border-radius:15px;
@@ -234,6 +308,8 @@
   .method p{color:var(--muted);font-size:14px;margin:0 0 10px;max-width:78ch}
   .method code{font-family:var(--mono);font-size:12.5px;background:var(--paper-2);border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--ink)}
   .foot{margin-top:24px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.02em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .foot a{color:var(--stable);text-decoration:none}
+  .foot a:hover{text-decoration:underline}
 
   .pane[hidden]{display:none}
 
@@ -248,12 +324,17 @@
     .legend{grid-template-columns:1fr}
     .dim{grid-template-columns:1fr;gap:3px}
     .dim .k{padding-top:0}
-    .plot{height:300px}
+    .plot{height:300px;min-width:540px}
+    .axis-x{min-width:540px}
+    .axis-y{left:6px;background:rgba(255,255,255,.65);padding:0 2px;border-radius:3px}
     .dot b{font-size:10px}
+    .tabs{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tab{flex:0 0 auto;padding:9px 14px;font-size:15px}
+    .plot-hint{display:block;font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:8px;text-align:center;letter-spacing:.03em}
   }
-  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-  .brow,.card{opacity:0;transform:translateY(6px);animation:rise .4s ease forwards}
-  @keyframes rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.brow,.card{opacity:1!important;transform:none!important}}
+  .brow,.card{animation:rise .4s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 </style>
 
 <div class="wrap">
@@ -268,6 +349,8 @@
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" aria-selected="true" data-pane="platforms">Platforms <span class="n">6</span></button>
     <button class="tab" role="tab" aria-selected="false" data-pane="genres">Genres <span class="n">10</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-pane="evaluate">Evaluate</button>
+    <button class="tab" role="tab" aria-selected="false" data-pane="sources">Sources <span class="n" id="srcCount">0</span></button>
   </div>
 
   <!-- ===================== PLATFORMS ===================== -->
@@ -337,11 +420,14 @@
     <div class="map-wrap">
       <h2 class="map-title">The opportunity map</h2>
       <p class="map-sub">Momentum against build cost. The green corner is the sweet spot: genres that are trending up and stay cheap to produce. The bottom right is where ambition gets expensive and the market is shrinking.</p>
-      <div class="plot" id="plot">
-        <div class="sweet"><span>Sweet spot</span></div>
-        <span class="axis-y">Cooling &nbsp;to&nbsp; Surging</span>
+      <div class="plot-scroll">
+        <div class="plot" id="plot">
+          <div class="sweet"><span>Sweet spot</span></div>
+          <span class="axis-y">Cooling &nbsp;to&nbsp; Surging</span>
+        </div>
+        <div class="axis-x">Cheaper to build &nbsp;&rarr;&nbsp; Costlier to build</div>
       </div>
-      <div class="axis-x">Cheaper to build &nbsp;&rarr;&nbsp; Costlier to build</div>
+      <div class="plot-hint">Swipe the chart sideways to see all genres</div>
     </div>
 
     <div class="controls" data-filters="genres">
@@ -376,18 +462,78 @@
     </div>
   </section>
 
+  <!-- ===================== EVALUATE ===================== -->
+  <section class="pane" id="pane-evaluate" hidden>
+    <div class="eval-intro">
+      <h2 class="eval-title">Test a concept</h2>
+      <p>Describe a game idea and see where it lands on the same momentum and build cost grid. This is a fit check, not a judgement on quality or a promise of success. It shows whether the shape of the idea sits in the sweet spot, what is pulling it out, and what would move it back in.</p>
+    </div>
+
+    <div class="eval-form">
+      <div class="field wide"><label>Concept name</label><input id="ev-name" type="text" placeholder="Name your concept"></div>
+      <div class="field"><label>Closest genre</label><select id="ev-genre"></select></div>
+      <div class="field"><label>Players</label><select id="ev-players">
+        <option value="single">Single-player</option>
+        <option value="coop">Co-op (2 to 6)</option>
+        <option value="online">Online multiplayer / live-service</option></select></div>
+      <div class="field"><label>Scope</label><select id="ev-scope">
+        <option value="bite">Bite-sized, one strong loop</option>
+        <option value="moderate" selected>Moderate, several levels or modes</option>
+        <option value="large">Large, campaign or lots of content</option></select></div>
+      <div class="field"><label>Art style</label><select id="ev-art">
+        <option value="stylized">Stylized / low-poly</option>
+        <option value="mid" selected>Mid fidelity</option>
+        <option value="high">High fidelity / realistic</option></select></div>
+      <div class="field"><label>The hook</label><select id="ev-hook">
+        <option value="derivative">Derivative of existing games</option>
+        <option value="twist" selected>Familiar, with a twist</option>
+        <option value="novel">Novel, VR-native hook</option></select></div>
+      <div class="field"><label>Lead platform</label><select id="ev-platform">
+        <option value="quest" selected>Quest standalone first</option>
+        <option value="pcvr">PCVR (Steam / Steam Frame)</option>
+        <option value="cross">Cross-platform</option>
+        <option value="premium">Premium only (Vision Pro / Swan)</option></select></div>
+      <div class="field wide"><label>Beyond XR (flatscreen &amp; console fit)</label><select id="ev-reach">
+        <option value="vr-only" selected>VR-only, embodiment is the point</option>
+        <option value="portable">Portable, core loop works flat with redesign</option>
+        <option value="agnostic">Cross-medium, plays great flat, console and in VR</option></select></div>
+      <div class="field"><label>Monetization</label><select id="ev-monet">
+        <option value="paid" selected>Paid, $10 to $20</option>
+        <option value="premiumprice">Premium, $30+</option>
+        <option value="f2p">Free-to-play / live-service</option></select></div>
+      <div class="field"><label>Team you can commit</label><select id="ev-team">
+        <option value="solo">Solo</option>
+        <option value="small" selected>2 to 4</option>
+        <option value="mid">5 to 15</option>
+        <option value="large">15+</option></select></div>
+      <div class="field wide eval-actions"><button class="eval-btn" id="ev-run">Evaluate concept</button></div>
+    </div>
+
+    <div class="eval-out" id="ev-out"></div>
+  </section>
+
+  <!-- ===================== SOURCES ===================== -->
+  <section class="pane" id="pane-sources" hidden>
+    <div class="src-intro">
+      <h2 class="src-title">Receipts</h2>
+      <p>Every call on these boards traces to public reporting, company announcements, or industry data, not model guesswork. Below are the primary sources behind each entry, grouped by topic and dated. Treat anything time sensitive as a snapshot as of the date shown at the top of this tool.</p>
+      <p class="src-how"><b>How to read confidence:</b> Confirmed means official or already shipping. Reported means a credible outlet, not yet official. Estimated means analyst inference where no official figure exists. Pre-launch means announced but not yet out.</p>
+    </div>
+    <div id="src-list"></div>
+  </section>
+
   <div class="note">
     <div class="eyebrow"><b>Built by a developer, for developers</b></div>
     <h3>Why this exists</h3>
     <p>I have spent more than 25 years building and releasing games and simulations across consoles, PC, VR, XR, and proprietary hardware. I have shipped award winning titles with teams that ranged from a handful of people to several hundred, and I have founded and run studios along the way.</p>
     <p>In 2024 I released Nope Challenge, a VR passion project. I was not chasing a blockbuster. I was chasing something I genuinely wanted to make, and it taught me more as a developer, designer, manager, and creative lead than almost any project before it. It reviewed well. But reviews do not make payroll, and even a passion project needs enough sales to keep a team fed and working.</p>
-    <p>That is the real problem this tool solves. VR is a wild, narrow market kept alive by a small group of genuinely great people. I have a long list of ideas I believe would be a joy to build and could reach a far wider audience than most VR titles ever do. The hard part is not the idea. It is the path. Which platform, which genre, which bet actually brings in enough to support a healthy small team without risking the studio.</p>
+    <p>That is the real problem this tool helps with. It is not here to make the decision for you. It is here to augment it, to give a developer firmer footing for a call only they can make. VR is a wild, narrow market kept alive by a small group of genuinely great people. I have a long list of ideas I believe would be a joy to build and could reach a far wider audience than most VR titles ever do. The hard part is not the idea. It is the path. Which platform, which genre, which bet actually brings in enough to support a healthy small team without risking the studio.</p>
     <p class="kicker">So I built a compass. Something that cuts through the noise and points at the next sound move. If it helps me choose well, it should help you choose well too. That is the whole point.</p>
     <div class="sign"><i></i>Founder, Happy Manic LLC &nbsp;.&nbsp; gamedevai.guide</div>
   </div>
 
   <div class="foot">
-    <span>Happy Manic LLC . gamedevai.guide</span>
+    <span>Happy Manic LLC &middot; gamedevai.guide &middot; <a href="https://www.linkedin.com/in/joehalper/" target="_blank" rel="noopener noreferrer">LinkedIn</a></span>
     <span id="count"></span>
   </div>
 </div>
@@ -402,43 +548,43 @@ const PLATFORMS = [
       install:{v:"Largest standalone install base by a wide margin, though headset shipments are reported down about 16% year over year. No official unit figures.", c:"estimated"},
       store:{v:"Horizon Store, roughly 30% revenue share. Curated main store with a concept approval gate. App Lab and sideloading act as side doors for discovery.", c:"reported"},
       dev:{v:"Horizon OS (Android based), OpenXR, full Unity and Unreal support. Quest 3 runs Snapdragon XR2 Gen 2. Strong color passthrough, hand tracking, mixed reality.", c:"confirmed"},
-      owner:{v:"Declining for VR gaming. Roughly 1,500 Reality Labs roles cut in January 2026, internal VR studios closed, Horizon OS sharing paused, the Phoenix headset pushed to 2027. Capital is moving to AI smart glasses.", c:"reported"},
+      owner:{v:"Declining for VR gaming. Around 1,500 Reality Labs roles cut in January 2026 (roughly 10% of the division), with multiple first-party VR studios closed (Sanzaru, Twisted Pixel, Armature) and Horizon Workrooms shut down. Capital is moving to AI smart glasses.", c:"reported"},
       regional:{v:"Broad global availability, including the US.", c:"confirmed"}
     },
     bottom:"Still where the players are, but you would be building on a platform whose owner is visibly reallocating to glasses. Excellent reach today, shrinking first party content and discovery investment. Treat it as a reach play, not a growth bet." },
 
-  { id:"02", name:"Valve Steam Frame", owner:"Valve", price:"~$800 to $1,000 est.", verdict:"rising", trend:"\u2197", checked:"16 Jun",
-    head:"Best economics, open platform, ships summer 2026",
+  { id:"02", name:"Valve Steam Frame", owner:"Valve", price:"Pricing TBA", verdict:"rising", trend:"\u2197", checked:"16 Jun",
+    head:"Best economics, open platform, ships this summer",
     dims:{
-      install:{v:"Zero today, ships summer 2026. Inherits Steam's huge PC base and existing SteamVR users, but a real headset install base is unproven and the premium price caps volume.", c:"prelaunch"},
+      install:{v:"Zero today, confirmed to ship this summer (2026). Inherits Steam's huge PC base and existing SteamVR users, but a real headset install base is unproven. Pricing is still unannounced, delayed by RAM and storage shortages.", c:"prelaunch"},
       store:{v:"Steam's standard split (30%, dropping to 25% then 20% at revenue tiers). Open platform, no concept approval gate, full Proton compatibility. The friendliest economics of the group.", c:"confirmed"},
-      dev:{v:"SteamOS (Arch Linux), Proton plus FEX-Emu, native ARM64 and Android APKs. Steam Frame Verified sets a 90 FPS standalone target, a concrete line to build against. Eye tracking and foveated rendering.", c:"confirmed"},
-      owner:{v:"Rising. Fresh hardware entry shipping summer 2026 alongside Steam Machine and a new Controller, with an active Verified developer program.", c:"confirmed"},
+      dev:{v:"SteamOS (Arch Linux), Proton plus FEX-Emu, native ARM64 and Android APKs. Snapdragon 8 Gen 3, around 30% more GPU than Quest 3, eye tracking and foveated streaming. The Steam Frame Verified standalone target was announced at GDC 2026 as 90 FPS, then lowered to 72 FPS in June, matching Quest and Pico.", c:"confirmed"},
+      owner:{v:"Rising. Fresh hardware entry shipping this summer alongside Steam Machine and a new Controller, with an active Verified developer program.", c:"confirmed"},
       regional:{v:"Available wherever Steam operates.", c:"confirmed"}
     },
-    bottom:"The strongest store terms and the only open platform here, with a clear performance target. The whole bet rides on whether the install base shows up. Premium pricing means it will not be a volume play at launch, but it is the cleanest platform to develop for." },
+    bottom:"The strongest store terms and the only open platform here. The whole bet rides on whether the install base shows up, and on a price Valve has not yet announced. Likely a premium device, so not a volume play at launch, but it is the cleanest platform to develop for." },
 
   { id:"03", name:"Samsung Galaxy XR", owner:"Samsung . Google . Qualcomm", price:"$1,799", verdict:"rising", trend:"\u2197", checked:"16 Jun",
     head:"Android XR's first device, ecosystem is the story",
     dims:{
       install:{v:"New, launched October 2025 in the US and Korea. Analysts project north of 100,000 units in 2026. Small, but the first device on a platform with real ecosystem reach, expanding to more markets through 2026.", c:"reported"},
       store:{v:"Google Play on Android XR, with 50 plus apps at launch (Adobe, MLB, Fox Sports). Standard Play economics and a large existing Android developer base.", c:"confirmed"},
-      dev:{v:"Android XR, ARCore, Android Studio, Jetpack Compose, Unity, OpenXR. Snapdragon XR2 plus Gen 2, 4.3K micro OLED passthrough, Gemini AI built in.", c:"confirmed"},
+      dev:{v:"Android XR, ARCore, Android Studio, Jetpack Compose, Unity, OpenXR. Snapdragon XR2 plus Gen 2, 16GB RAM, dual micro OLED (around 27MP total) up to 90Hz, Gemini AI built in.", c:"confirmed"},
       owner:{v:"Rising. Strategic Samsung, Google and Qualcomm platform with multiple Android XR devices and glasses planned. Enterprise is a primary target alongside consumer.", c:"reported"},
       regional:{v:"US and Korea now, more markets rolling out in 2026.", c:"reported"}
     },
     bottom:"The long game. This single $1,799 headset is not the audience. Android XR's distribution reach and Gemini integration are. Tiny install base today, but the platform with the most ecosystem weight behind it. Worth tracking even if you do not build yet." },
 
-  { id:"04", name:"PICO 4 Ultra to Project Swan", owner:"ByteDance", price:"~$549 / Swan TBD", verdict:"wildcard", trend:"\u2197", checked:"16 Jun",
-    head:"Funded wildcard making a premium global push",
+  { id:"04", name:"PICO 4 Ultra to Project Swan", owner:"ByteDance", price:"~$549 / Swan TBA", verdict:"wildcard", trend:"\u2197", checked:"16 Jun",
+    head:"Funded wildcard, premium MR, US access doubtful",
     dims:{
-      install:{v:"Modest, concentrated in China, Asia and Europe, historically absent from the US. No reliable public figures.", c:"estimated"},
-      store:{v:"PICO Store, smaller catalog than Quest or Steam, revenue share broadly comparable to peers. A separate GameTop, Steam style store has been reported.", c:"reported"},
-      dev:{v:"Pico OS 6 with Spatial Engine, XR2 Gen 2 on the 4 Ultra. Project Swan adds a self developed chip and roughly 4000 PPI micro OLED. Unity, Unreal, OpenXR.", c:"reported"},
-      owner:{v:"Rising. ByteDance is funding a premium repositioning. Project Swan targets a late 2026 global launch including the US, a real signal of intent to compete outside Asia.", c:"reported"},
-      regional:{v:"China, Asia and EU today, with US expansion targeted for late 2026.", c:"reported"}
+      install:{v:"Modest, concentrated in China, Asia and Europe. Not sold in the US. No reliable public figures.", c:"estimated"},
+      store:{v:"PICO Store, smaller catalog than Quest or Steam. Project Swan runs Pico OS 6, a general spatial computing model where a primary experience and companion apps coexist.", c:"reported"},
+      dev:{v:"Pico OS 6 with a Spatial Engine, XR2 Gen 2 on the 4 Ultra. Project Swan pairs a self developed dual chip (claimed more than 2x the CPU and GPU of XR2 Gen 2) with a custom micro OLED near 4000 PPI. Unity, Unreal, OpenXR.", c:"reported"},
+      owner:{v:"Rising as a technology bet. ByteDance cut content and marketing spend in 2023 to focus on hardware. Project Swan targets a global launch in late 2026, but US availability is unconfirmed, as ByteDance keeps Pico out of North America to avoid political scrutiny.", c:"reported"},
+      regional:{v:"China, Asia and Europe today. Not in the US, and Project Swan's US availability is unconfirmed.", c:"reported"}
     },
-    bottom:"The deep pocketed wildcard. A credible US entry plus premium hardware could open a genuine second platform, but catalog, distribution and Western demand are all unproven. High upside, high uncertainty. Watch the Swan launch closely." },
+    bottom:"The deep pocketed wildcard, but aimed more at premium mixed reality and spatial computing than mass gaming, and it may not reach the US at all. Worth watching for the technology, but do not bank on it as a Western gaming platform yet." },
 
   { id:"05", name:"Sony PSVR2", owner:"Sony", price:"$549.99", verdict:"declining", trend:"\u2198", checked:"16 Jun",
     head:"Great hardware, fading first party commitment",
@@ -457,10 +603,10 @@ const PLATFORMS = [
       install:{v:"Small, held back by a premium price and limited consumer traction. No official figures.", c:"estimated"},
       store:{v:"visionOS App Store with Apple's standard cut and strict review.", c:"confirmed"},
       dev:{v:"visionOS, Swift and RealityKit, Unity PolySpatial. Hand and eye input, no controllers. Best in class display fidelity.", c:"confirmed"},
-      owner:{v:"Declining for the current device. The Vision Pro team was reportedly disbanded and engineers moved to AI glasses. A cheaper, lighter model is rumored for the 2026 to 2027 window.", c:"reported"},
+      owner:{v:"Declining. After the M5 model's weak reception, the Vision Pro team was reportedly disbanded and reassigned, the cheaper 'Vision Air' was cancelled, and incoming CEO John Ternus signed off on dropping a second Vision Pro. Per Gurman, any successor is unlikely before 2028 to 2029, with the category 'on ice' while Apple pivots to smart glasses.", c:"reported"},
       regional:{v:"US plus a handful of additional markets.", c:"confirmed"}
     },
-    bottom:"Unmatched fidelity, the smallest gaming audience, and an owner pivoting to glasses. Niche premium or experiential bets only, until a cheaper device and a clearer roadmap arrive. Park it on the watchlist." }
+    bottom:"Unmatched fidelity, the smallest gaming audience, and an owner who has put the category on ice to chase smart glasses. Niche premium or experiential bets only, and no clearer roadmap until 2028 at the earliest. Park it on the watchlist." }
 ];
 
 const GENRES = [
@@ -649,14 +795,186 @@ function openCard(id){
   card.querySelector('summary').focus({preventScroll:true});
 }
 
+/* ---------- evaluate ---------- */
+const evGenreSel=document.getElementById('ev-genre');
+GENRES.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;evGenreSel.appendChild(o);});
+
+const MODS={
+  players:{
+    single:{dm:-3,dc:-5,help:"No netcode keeps the build lean",hurt:"Single-player carries less built-in virality"},
+    coop:{dm:5,dc:8,help:"Co-op is the rising social form and fuels word of mouth",hurt:"Co-op netcode adds real engineering"},
+    online:{dm:8,dc:22,help:"Online multiplayer has the highest social ceiling",hurt:"Live-service netcode, anti-cheat and content cadence are expensive"}
+  },
+  scope:{
+    bite:{dm:4,dc:-12,help:"A tight single loop is cheap and ships fast"},
+    moderate:{dm:0,dc:0},
+    large:{dm:-2,dc:22,hurt:"A large content footprint balloons cost and timeline"}
+  },
+  art:{
+    stylized:{dm:2,dc:-10,help:"Stylized art keeps budgets sane and clips well for sharing"},
+    mid:{dm:0,dc:0},
+    high:{dm:1,dc:18,hurt:"High fidelity is costly and fights standalone performance budgets"}
+  },
+  hook:{
+    derivative:{dm:-12,dc:0,hurt:"A derivative hook struggles in a saturated catalog"},
+    twist:{dm:0,dc:0},
+    novel:{dm:10,dc:2,help:"A novel, VR-native hook is the single biggest driver of breakout reach"}
+  },
+  platform:{
+    quest:{dm:5,dc:-2,help:"Quest standalone is where the movers and the audience are"},
+    pcvr:{dm:-4,dc:6,hurt:"PCVR reaches a smaller, premium audience"},
+    cross:{dm:4,dc:8,help:"Cross-platform maximizes a small total audience",hurt:"Supporting several platforms adds porting and QA cost"},
+    premium:{dm:-10,dc:8,hurt:"Premium-only headsets have tiny install bases today"}
+  },
+  monet:{
+    paid:{dm:0,dc:0},
+    premiumprice:{dm:-6,dc:0,hurt:"A higher price shrinks the impulse-buy audience in VR"},
+    f2p:{dm:6,dc:14,help:"F2P matches the social ceiling",hurt:"F2P means live-service costs: servers, cosmetics, moderation, ongoing content"}
+  },
+  reach:{
+    "vr-only":{dm:0,dc:0,hurt:"XR-only means the market is capped by the headset install base"},
+    portable:{dm:5,dc:8,help:"Adaptable to flatscreen, widening the market well beyond XR",hurt:"A flat version needs its own design and control pass"},
+    agnostic:{dm:9,dc:12,help:"Cross-medium reach taps the mainstream PC and console audience, so it is not capped by the small XR base",hurt:"Supporting flat and console adds dual control schemes, extra QA, and console certification"}
+  }
+};
+const REACH_INFO={
+  "vr-only":{label:"XR-only",tone:"capped",text:"This survives on the XR install base alone, which is small. Even a great game has a low ceiling here."},
+  portable:{label:"Portable to flat",tone:"broad",text:"The core loop can be adapted to a screen, opening the door to the far larger PC and console audience."},
+  agnostic:{label:"Cross-medium",tone:"broad",text:"Plays well on a monitor and console as well as in VR. The mainstream audience is in reach, so the concept is not betting its survival on XR."}
+};
+const clamp=(n)=>Math.max(2,Math.min(100,n));
+const momBand=(m)=>m>=75?'High':m>=55?'Moderate to high':m>=40?'Moderate':'Low';
+const costBand=(c)=>c<=35?'Low':c<=50?'Low to moderate':c<=68?'Moderate to high':'High';
+
+function scoreConcept(p){
+  const g=GENRES.find(x=>x.id===p.genre)||GENRES[2];
+  let m=g.map.y, c=g.map.x;
+  const helps=[],hurts=[],tips=[];
+  ['players','scope','art','hook','platform','monet','reach'].forEach(k=>{
+    const mod=MODS[k][p[k]];if(!mod)return;
+    m+=mod.dm||0;c+=mod.dc||0;
+    if(mod.help)helps.push(mod.help);
+    if(mod.hurt)hurts.push(mod.hurt);
+  });
+  m=clamp(m);c=clamp(c);
+  if(p.scope==='large')tips.push("Cut to a few high-quality levels and ship the core loop first.");
+  if(p.players==='online')tips.push("A bounded, peer-hosted co-op gets most of the social upside at a fraction of live-service cost.");
+  if(p.art==='high')tips.push("Hold the art stylized: cheaper, better standalone performance, and stronger clips for word of mouth.");
+  if(p.platform==='premium')tips.push("Lead on Quest standalone where the audience is; treat premium headsets as later ports.");
+  if(p.platform==='pcvr')tips.push("If reach matters, plan a Quest standalone build too; PCVR alone is a small base.");
+  if(p.hook==='derivative')tips.push("Find one genuinely novel, VR-native twist. In this catalog the hook is the line between a hit and invisibility.");
+  if(p.monet==='f2p'&&(p.team==='solo'||p.team==='small'))tips.push("F2P is a live-service company. Only commit if you can staff ongoing operations.");
+  if(c>=60&&(p.team==='solo'||p.team==='small'))tips.push("This scope likely outruns a small or part-time team. Either shrink scope or lock in a committed core before starting.");
+  if(p.reach==='vr-only')tips.push("Pressure-test whether embodiment is truly essential. If the core loop could survive on a screen, a flat or console version multiplies the audience and the revenue that supports a team.");
+  if(tips.length===0)tips.push("The shape is sound. Protect it: resist scope creep, keep the hook sharp, and ship the core loop before adding to it.");
+  const highMom=m>=58, lowCost=c<=46;
+  let verdict,vclass,summary;
+  if(highMom&&lowCost){verdict="Sweet spot";vclass="rising";summary="Rising trajectory at a build cost a small team can carry. This is the lane to be in.";}
+  else if(highMom&&!lowCost){verdict="Hot but heavy";vclass="surging";summary="The momentum is real, but cost and risk are high. Worth it only if you can fund and staff it.";}
+  else if(!highMom&&lowCost){verdict="Cheap but quiet";vclass="stable";summary="Affordable to build, but momentum is modest. Fine for a passion project, thin for paying a team.";}
+  else{verdict="Danger zone";vclass="declining";summary="Expensive and not trending up. The hardest place to fund a small studio from.";}
+  if(p.reach==='agnostic'||p.reach==='portable'){
+    if(vclass==='surging')summary+=" Cross-medium reach helps justify the heavier build, since the audience is not capped by XR.";
+    else if(vclass==='rising')summary+=" And it is not capped by XR, which lifts the ceiling further.";
+    else summary+=" Its flatscreen and console reach is the strongest thing going for it.";
+  } else if(vclass==='rising'){summary+=" Note it still lives or dies on the small XR install base.";}
+  return {m,c,helps,hurts,tips,verdict,vclass,summary};
+}
+
+function renderEvaluation(){
+  const p={
+    name:(document.getElementById('ev-name').value.trim()||'Your concept'),
+    genre:document.getElementById('ev-genre').value,
+    players:document.getElementById('ev-players').value,
+    scope:document.getElementById('ev-scope').value,
+    art:document.getElementById('ev-art').value,
+    hook:document.getElementById('ev-hook').value,
+    platform:document.getElementById('ev-platform').value,
+    monet:document.getElementById('ev-monet').value,
+    team:document.getElementById('ev-team').value,
+    reach:document.getElementById('ev-reach').value
+  };
+  const r=scoreConcept(p);
+  const ri=REACH_INFO[p.reach];
+  let refDots='';
+  GENRES.forEach(g=>{refDots+=`<div class="dot ev-ref" style="left:${g.map.x}%;bottom:${g.map.y}%"><i class="s-${g.trajectory}"></i><b>${g.short}</b></div>`;});
+  const conceptDot=`<div class="dot ev-concept" style="left:${r.c}%;bottom:${r.m}%"><i class="s-${r.vclass}"></i><b>${p.name}</b></div>`;
+  const helps=r.helps.length?r.helps.map(h=>`<li>${h}</li>`).join(''):'<li>Levers are neutral. Nothing standout yet.</li>';
+  const hurts=r.hurts.length?r.hurts.map(h=>`<li>${h}</li>`).join(''):'<li>Nothing major is dragging it down.</li>';
+  const tips=r.tips.map(t=>`<li>${t}</li>`).join('');
+  document.getElementById('ev-out').innerHTML=`
+    <div class="eval-result">
+      <div class="eval-head">
+        <span class="verdict-pill p-${r.vclass}">${r.verdict}</span>
+        <span class="eval-name">${p.name}</span>
+        <span class="eval-bands">Momentum: ${momBand(r.m)} &middot; Build cost: ${costBand(r.c)} &middot; Reach: ${ri.label}</span>
+      </div>
+      <p class="eval-summary">${r.summary}</p>
+      <div class="reach-note reach-${ri.tone}"><span class="reach-tag">Reach beyond XR</span><b>${ri.label}.</b> ${ri.text}</div>
+      <div class="plot-scroll">
+        <div class="plot ev-plot">
+          <div class="sweet"><span>Sweet spot</span></div>
+          <span class="axis-y">Cooling &nbsp;to&nbsp; Surging</span>
+          ${refDots}${conceptDot}
+        </div>
+        <div class="axis-x">Cheaper to build &nbsp;&rarr;&nbsp; Costlier to build</div>
+      </div>
+      <div class="plot-hint">Swipe the chart sideways to see all genres</div>
+      <div class="read-cols">
+        <div class="read-col help"><h4>What is helping</h4><ul>${helps}</ul></div>
+        <div class="read-col hurt"><h4>Working against it</h4><ul>${hurts}</ul></div>
+      </div>
+      <div class="tips"><h4>Moves toward the sweet spot</h4><ul>${tips}</ul></div>
+    </div>`;
+}
+document.getElementById('ev-run').addEventListener('click',renderEvaluation);
+document.getElementById('ev-out').innerHTML='<div class="eval-empty">Fill in the details above and hit <b>Evaluate concept</b> to plot your idea against the grid.</div>';
+
+/* ---------- sources ---------- */
+const SOURCES=[
+  { group:"Platforms", items:[
+    { topic:"Steam Frame", outlet:"Road to VR", date:"Nov 2025", title:"Valve Unveils Steam Frame VR Headset", url:"https://roadtovr.com/valve-steam-frame-release-date-price-specs/" },
+    { topic:"Steam Frame", outlet:"Road to VR", date:"Mar 2026", title:"Steam Frame Still Coming This Year, Marked 'Coming Soon'", url:"https://roadtovr.com/valve-steam-frame-coming-soon-2026/" },
+    { topic:"Meta Quest", outlet:"Road to VR", date:"Jan 2026", title:"Meta Reportedly Laying Off 10% of Reality Labs", url:"https://roadtovr.com/meta-layoff-10-percent-reality-labs-report/" },
+    { topic:"Meta Quest", outlet:"UploadVR", date:"Feb 2026", title:"Meta CTO Explains Layoffs & Strategy Shift", url:"https://www.uploadvr.com/meta-cto-explains-layoffs-strategy-shift-vr-is-growing-less-quickly-than-we-hoped/" },
+    { topic:"Samsung Galaxy XR", outlet:"Road to VR", date:"Oct 2025", title:"Samsung Galaxy XR Price, Specs & Release Date", url:"https://roadtovr.com/samsung-galaxy-xr-headset-price-specs-release-date/" },
+    { topic:"Samsung Galaxy XR", outlet:"Android Central", date:"Oct 2025", title:"Samsung Galaxy XR: Price, Specs, Games", url:"https://www.androidcentral.com/gaming/virtual-reality/samsung-galaxy-xr" },
+    { topic:"PICO Project Swan", outlet:"UploadVR", date:"Mar 2026", title:"Pico's Next Headset Has 4000 PPI Micro-OLEDs", url:"https://www.uploadvr.com/pico-project-swan-official-display-compute-specs-announcement/" },
+    { topic:"PICO Project Swan", outlet:"Road to VR", date:"Mar 2026", title:"Pico Unveils OS 6, Teases 'Project Swan'", url:"https://roadtovr.com/pico-project-swan-os-6-update/" },
+    { topic:"Sony PSVR2", outlet:"UploadVR", date:"2024", title:"Sony Reportedly Pausing PSVR2 Production", url:"https://www.uploadvr.com/sony-reportedly-pausing-playstation-vr2-production/" },
+    { topic:"Sony PSVR2", outlet:"Wikipedia", date:"ongoing", title:"PlayStation VR2 (production, PC adapter, dev cutbacks)", url:"https://en.wikipedia.org/wiki/PlayStation_VR2" },
+    { topic:"Apple Vision Pro", outlet:"MacRumors", date:"Jun 2026", title:"Kuo: Vision Pro Successors Off the Table", url:"https://www.macrumors.com/2026/06/03/kuo-vision-pro-successors-nixed/" },
+    { topic:"Apple Vision Pro", outlet:"Tom's Guide", date:"Apr 2026", title:"Apple Has Reportedly Stopped Work on the Vision Pro", url:"https://www.tomsguide.com/computing/vr-ar/apple-has-reportedly-stopped-work-on-the-vision-pro-heres-what-we-know" }
+  ]},
+  { group:"Genres & market", items:[
+    { topic:"Best-sellers & movers", outlet:"Road to VR", date:"2026", title:"The 50 Best-selling Quest Games of All Time, 2026 Analysis", url:"https://roadtovr.com/best-selling-quest-games-all-time-2026/" },
+    { topic:"2025 sales & F2P data", outlet:"GameDiscoverCo (Simon Carless)", date:"Jan 2026", title:"What Happened to VR Games in 2025?", url:"https://newsletter.gamediscover.co/p/what-happened-to-vr-games-in-2025" },
+    { topic:"Weekly Quest charts", outlet:"MIXED", date:"2025", title:"Meta Quest Charts (Gorilla Tag, Animal Company, I Am Cat, Scary Baboon)", url:"https://mixed-news.com/en/meta-quest-charts-week-2-2025/" }
+  ]}
+];
+const srcList=document.getElementById('src-list');
+SOURCES.forEach(g=>{
+  const sec=document.createElement('div');sec.className='src-group';
+  let items='';
+  g.items.forEach(it=>{
+    items+=`<div class="src-item"><span class="topic">${it.topic}</span>`+
+      `<span class="ref"><a href="${it.url}" target="_blank" rel="noopener noreferrer">${it.title}</a>`+
+      `<span class="meta">${it.outlet} &middot; ${it.date}</span></span></div>`;
+  });
+  sec.innerHTML=`<h3>${g.group}</h3>${items}`;
+  srcList.appendChild(sec);
+});
+document.getElementById('srcCount').textContent=document.querySelectorAll('#src-list .src-item').length;
+
 /* ---------- tabs ---------- */
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(tab=>{
   tab.addEventListener('click',()=>{
     tabs.forEach(t=>t.setAttribute('aria-selected','false'));
     tab.setAttribute('aria-selected','true');
-    document.getElementById('pane-platforms').hidden = tab.dataset.pane!=='platforms';
-    document.getElementById('pane-genres').hidden = tab.dataset.pane!=='genres';
+    ['platforms','genres','evaluate','sources'].forEach(p=>{
+      document.getElementById('pane-'+p).hidden = tab.dataset.pane!==p;
+    });
     updateCount(tab.dataset.pane);
   });
 });
@@ -681,6 +999,15 @@ wireFilters('platforms');
 wireFilters('genres');
 
 function updateCount(scope){
+  if(scope==='evaluate'){
+    document.getElementById('count').textContent='concept fit check';
+    return;
+  }
+  if(scope==='sources'){
+    const n=document.querySelectorAll('#src-list .src-item').length;
+    document.getElementById('count').textContent=n+' sources cited';
+    return;
+  }
   const board=document.getElementById('board-'+scope);
   const rows=[...board.querySelectorAll('.brow')];
   const shown=rows.filter(r=>r.style.display!=='none').length;
