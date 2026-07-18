@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friendslop Idea Page — Happy Manic</title>
+<style>
+  :root{
+    --bg:#171c24; --panel:#1f2630; --panel2:#252d39; --line:#333d4b;
+    --ink:#e8ecf1; --dim:#97a3b2;
+    --pp:#e8833a; --sh:#5fbf6e; --bo:#4fb8e0; --bad:#8f7df0;
+    --extreme:#ff4d6d; --highest:#ff8a3d; --high:#ffc53d; --med:#5d7186; --low:#39434f;
+    --mono:ui-monospace,'SF Mono','Cascadia Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5;padding:32px 22px 70px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  /* ---------- gate ---------- */
+  #gate{
+    position:fixed;inset:0;background:var(--bg);z-index:50;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .gatebox{max-width:400px;width:100%;background:var(--panel);border-radius:12px;padding:30px;border-top:5px solid var(--extreme)}
+  .gatebox h1{font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em}
+  .gatebox h1 span{color:var(--extreme)}
+  .gatebox p{font-size:14px;color:var(--dim);margin:10px 0 18px}
+  .gatebox label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:14px 0 5px}
+  .gatebox input{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;
+    color:var(--ink);font-size:16px;padding:11px 13px;outline:none;
+  }
+  .gatebox input:focus{border-color:var(--bo)}
+  .gatebox button{
+    width:100%;margin-top:20px;background:var(--extreme);color:#fff;border:none;border-radius:8px;
+    font-size:15px;font-weight:800;padding:13px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;
+  }
+  .gatebox button:hover{filter:brightness(1.1)}
+  #gateerr{color:var(--extreme);font-size:13px;margin-top:12px;min-height:18px}
+  .gatefoot{font-size:11px;color:var(--dim);margin-top:14px;font-family:var(--mono);letter-spacing:.04em}
+
+  /* ---------- admin log ---------- */
+  #adminlog{display:none;max-width:640px;margin:0 auto}
+  #adminlog h2{margin-bottom:16px}
+  #adminlog table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:10px;overflow:hidden}
+  #adminlog th,#adminlog td{text-align:left;padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line)}
+  #adminlog th{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+
+  #content{display:none}
+
+  header{margin-bottom:24px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+  h1{font-size:clamp(32px,5.5vw,54px);font-weight:900;letter-spacing:-.02em;line-height:1.02;text-transform:uppercase}
+  h1 .slop{color:var(--extreme)}
+  .thesis{margin-top:14px;max-width:700px;color:var(--dim);font-size:16px}
+  .thesis b{color:var(--ink)}
+  .howto{margin-top:14px;max-width:700px;font-size:14px;color:var(--dim)}
+  .howto b{color:var(--ink)}
+  .ref{font-family:var(--mono);font-size:13px;background:var(--panel);padding:1px 7px;border-radius:4px;color:var(--bo)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;padding:6px 11px;border-radius:5px;text-transform:uppercase}
+  .g-EXTREME{background:var(--extreme);color:#fff}
+  .g-HIGHEST{background:var(--highest);color:#241304}
+  .g-HIGH{background:var(--high);color:#2b2103}
+  .g-MED{background:var(--med);color:#eef2f6}
+  .g-LOW{background:var(--low);color:#94a1b0}
+
+  section{margin-top:48px}
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:16px}
+
+  /* ---------- pitches ---------- */
+  .pitchgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+  .pitch{background:var(--panel);border-radius:10px;border-top:5px solid var(--line)}
+  .pitch.pp{border-top-color:var(--pp)} .pitch.sh{border-top-color:var(--sh)}
+  .pitch.bo{border-top-color:var(--bo)} .pitch.bad{border-top-color:var(--bad)}
+  .pitch summary{list-style:none;cursor:pointer;padding:18px 20px}
+  .pitch summary::-webkit-details-marker{display:none}
+  .pitch .pname{font-weight:900;font-size:19px;text-transform:uppercase;display:block}
+  .pitch.pp .pname{color:var(--pp)} .pitch.sh .pname{color:var(--sh)}
+  .pitch.bo .pname{color:var(--bo)} .pitch.bad .pname{color:var(--bad)}
+  .pitch .oneliner{font-size:15px;color:var(--dim);font-style:italic;display:block;margin-top:3px}
+  .pitch .expand{font-family:var(--mono);font-size:12px;color:var(--dim);display:block;margin-top:10px}
+  .pitch[open] .expand .c{display:none}
+  .pitch:not([open]) .expand .o{display:none}
+  .pitchbody{padding:0 20px 20px;font-size:15px}
+  .pitchbody p{margin-bottom:12px}
+  .pitchbody b{color:var(--ink)}
+  .qs{margin-top:6px;background:var(--bg);border-radius:8px;padding:14px 16px}
+  .qs .qlabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--extreme);display:block;margin-bottom:8px}
+  .qs ol{margin-left:20px}
+  .qs li{font-size:14px;margin-bottom:7px}
+
+  /* ---------- heat map ---------- */
+  .grid{display:grid;grid-template-columns:200px repeat(4,1fr);gap:7px}
+  .colhead{background:var(--panel2);border-radius:8px;padding:14px 12px;text-align:center;border-top:5px solid var(--line)}
+  .colhead.pp{border-top-color:var(--pp)} .colhead.sh{border-top-color:var(--sh)}
+  .colhead.bo{border-top-color:var(--bo)} .colhead.bad{border-top-color:var(--bad)}
+  .colhead .name{font-weight:900;font-size:16px;text-transform:uppercase}
+  .ttp{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;font-weight:700;padding:4px 10px;border-radius:4px;background:var(--bg)}
+  .pp .ttp{color:var(--pp)} .sh .ttp{color:var(--sh)} .bo .ttp{color:var(--bo)} .bad .ttp{color:var(--bad)}
+  .crit{background:var(--panel);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+  .crit .cnum{font-family:var(--mono);font-size:11px;color:var(--bo);letter-spacing:.12em}
+  .crit .cname{font-weight:700;font-size:14px}
+  .crit .cdef{font-size:12px;color:var(--dim);margin-top:2px}
+  .cell{border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:center}
+  .cell .grade{font-family:var(--mono);font-size:13px;font-weight:800;letter-spacing:.1em}
+  .corner{background:none}
+
+  /* ---------- TTP ---------- */
+  .ttpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .ttpcard{background:var(--panel);border-radius:10px;padding:20px;border-top:5px solid var(--line)}
+  .ttpcard.pp{border-top-color:var(--pp)} .ttpcard.sh{border-top-color:var(--sh)}
+  .ttpcard.bo{border-top-color:var(--bo)} .ttpcard.bad{border-top-color:var(--bad)}
+  .ttpcard .big{font-size:34px;font-weight:900}
+  .ttpcard.pp .big{color:var(--pp)} .ttpcard.sh .big{color:var(--sh)}
+  .ttpcard.bo .big{color:var(--bo)} .ttpcard.bad .big{color:var(--bad)}
+  .ttpcard .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+  .ttpcard .q{margin-top:10px;font-size:14px}
+
+  /* ---------- enhancements ---------- */
+  .enhgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .enh{background:var(--panel);border-radius:10px;padding:20px}
+  .enh h3{font-size:16px;font-weight:900;text-transform:uppercase;margin-bottom:10px}
+  .enh.pp h3{color:var(--pp)} .enh.sh h3{color:var(--sh)} .enh.bo h3{color:var(--bo)} .enh.bad h3{color:var(--bad)}
+  .enh ul{list-style:none}
+  .enh li{font-size:14px;padding:8px 0 8px 18px;border-bottom:1px solid var(--line);position:relative}
+  .enh li:last-child{border-bottom:none}
+  .enh li::before{content:"+";position:absolute;left:0;font-family:var(--mono);font-weight:800;color:var(--dim)}
+
+  .verdict{margin-top:48px;background:var(--panel2);border-radius:10px;padding:22px 24px;border-left:5px solid var(--extreme);font-size:15px;max-width:920px}
+  .verdict b{color:var(--extreme)}
+  footer{margin-top:28px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+
+  @media (max-width:920px){
+    .grid{grid-template-columns:1fr;gap:5px}
+    .crit{margin-top:16px}
+    .colhead{display:none}
+    .cell{justify-content:flex-start;gap:10px}
+    .cell::before{content:attr(data-game);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<div id="gate">
+  <div class="gatebox">
+    <h1>Friend<span>slop</span><br>Idea Page</h1>
+    <p>Private concept review. Enter your name and the password Joe gave you.</p>
+    <label for="vname">Your name</label>
+    <input id="vname" type="text" autocomplete="off" placeholder="So Joe knows who stopped by">
+    <label for="vpass">Password</label>
+    <input id="vpass" type="password" autocomplete="off">
+    <button id="enterbtn">Enter</button>
+    <div id="gateerr"></div>
+    <div class="gatefoot">Your name and entry time are logged for Joe.</div>
+  </div>
+</div>
+
+<!-- ============ ADMIN LOG VIEW ============ -->
+<div id="adminlog" class="wrap">
+  <h2>Visitor Log</h2>
+  <table>
+    <thead><tr><th>Name</th><th>Entered</th></tr></thead>
+    <tbody id="logbody"><tr><td colspan="2">Loading…</td></tr></tbody>
+  </table>
+</div>
+
+<!-- ============ PAGE ============ -->
+<div id="content" class="wrap">
+
+<header>
+  <div class="kicker">Happy Manic · Concept Lab · July 2026</div>
+  <h1>Friend<span class="slop">slop</span> Idea Page</h1>
+  <p class="thesis">Friendslop: cheap, goofy co-op games built around playing with friends — Lethal Company, PEAK, R.E.P.O. The genre's rule is <b>thin systems, tuned precisely, so the players generate the content.</b> Four original concepts below, graded against the must-haves. Every grade is my own pre-prototype call — tell me where I'm wrong.</p>
+  <p class="howto"><b>How to comment:</b> each concept has a code — <b>PP</b> Porch Pirates, <b>SH</b> Shear, <b>BO</b> Bounce, <b>AD</b> After Dark — and criteria are numbered C1–C8, so you can just say <span class="ref">AD-C5 feels generous</span>. Tap any concept card for the full pitch.</p>
+  <div class="legend">
+    <span class="chip g-EXTREME">Extreme</span>
+    <span class="chip g-HIGHEST">Highest</span>
+    <span class="chip g-HIGH">High</span>
+    <span class="chip g-MED">Med</span>
+    <span class="chip g-LOW">Low</span>
+  </div>
+</header>
+
+<section>
+  <h2>The Concepts</h2>
+  <div class="pitchgrid">
+
+    <details class="pitch pp">
+      <summary>
+        <span class="pname">Porch Pirates <small style="font-family:var(--mono);font-size:11px;opacity:.65;letter-spacing:.12em">PP</small></span>
+        <span class="oneliner">"Winning exposes you."</span>
+        <span class="expand"><span class="c">▸ Read the pitch</span><span class="o">▾ Close</span></span>
+      </summary>
+      <div class="pitchbody">
+        <p>A sunny sitcom suburb on delivery day. Most players are homeowners guarding packages; a hidden few are pirates. Stealing a package <b>instantly transforms you</b> — a sea shanty plays from your body, spatialized so anyone nearby can hunt you by sound, and a slapstick chase to a flying pirate ship begins. Drop the loot to revert. Anyone can call an HOA meeting to vote a suspect off the street.</p>
+        <p><b>Why it works:</b> the win action and the getting-caught action are the same act. Greed literally makes noise, so the tension generates itself.</p>
+        <div class="qs">
+          <span class="qlabel">Questions for you</span>
+          <ol>
+            <li>Which sounds more fun: pirate or homeowner? If one side is boring, the game is broken.</li>
+            <li>Does the HOA vote add drama, or slow down a chase game?</li>
+          </ol>
+        </div>
+      </div>
+    </details>
+
+    <details class="pitch sh">
+      <summary>
+        <span class="pname">Shear <small style="font-family:var(--mono);font-size:11px;opacity:.65;letter-spacing:.12em">SH</small></span>
+        <span class="oneliner">"The product fights back."</span>
+        <span class="expand"><span class="c">▸ Read the pitch</span><span class="o">▾ Close</span></span>
+      </summary>
+      <div class="pitchbody">
+        <p>You and your friends run a wool farm. The livestock have not agreed to the business plan. Market days run 10–15 minutes: corral physics-driven sheep, alpacas and llamas that resist, flee and spit; shear them (the fluffy-to-naked reveal is the signature gag); the machine and shop run themselves. Demand rises, unsheared animals grow into rolling wool boulders, and the roster gets weirder every round.</p>
+        <p><b>Why it works:</b> the goal has opinions. Every dollar earned is a physical argument with an animal — nobody scripts the llama.</p>
+        <div class="qs">
+          <span class="qlabel">Questions for you</span>
+          <ol>
+            <li>Can uncooperative animals alone — no monsters — hold your group for 30 minutes?</li>
+            <li>Funniest pressure engine: wool overgrowth, demand spikes, or breeding runaway?</li>
+          </ol>
+        </div>
+      </div>
+    </details>
+
+    <details class="pitch bo">
+      <summary>
+        <span class="pname">Bounce <small style="font-family:var(--mono);font-size:11px;opacity:.65;letter-spacing:.12em">BO</small></span>
+        <span class="oneliner">"You don't jump — you get jumped."</span>
+        <span class="expand"><span class="c">▸ Read the pitch</span><span class="o">▾ Close</span></span>
+      </summary>
+      <div class="pitchbody">
+        <p>The camp blob. One player lies on the end of the giant lake inflatable; a friend jumps from the tower onto the other end and launches them — at targets, at hanging grabs, over the croc line, onto the next platform. Mid-air you're a steerable ragdoll. Chain blobs and the group leapfrogs the whole lake, where one flop strands everyone. Solo, the mechanic flips Angry Birds-style: you're the jumper, launching dummies and an inflatable flamingo at targets.</p>
+        <p><b>Why it works:</b> your friend's timing decides your flight. Every launch is a trust fall at 40 feet — and deliberately bad jumps are perfectly legal.</p>
+        <div class="qs">
+          <span class="qlabel">Questions for you</span>
+          <ol>
+            <li>Honestly — would you play this solo?</li>
+            <li>Is legal sabotage funny in your group, or does it start fights?</li>
+          </ol>
+        </div>
+      </div>
+    </details>
+
+    <details class="pitch bad">
+      <summary>
+        <span class="pname">Bounce: After Dark <small style="font-family:var(--mono);font-size:11px;opacity:.65;letter-spacing:.12em">AD</small></span>
+        <span class="oneliner">"Every escape needs a volunteer."</span>
+        <span class="expand"><span class="c">▸ Read the pitch</span><span class="o">▾ Close</span></span>
+      </summary>
+      <div class="pitchbody">
+        <p>A summer-camp slasher movie where the blob is your only way out. <b>Days</b> are the hangout lake above — goofing off, targets, solo slingshot play. <b>Nights</b>, something hunts the camp: a lethal "NO RUNNING" lifeguard, a mascot with something wrong inside. The lake is off-limits (something lives in it), so you can't swim — only fly. Launches are loud, and every splash announces your position. The launcher can't launch themselves, so every escape needs a volunteer to stay behind. Someone is always last.</p>
+        <p><b>Why it works:</b> the fun thing is the dangerous thing — the mechanic you want to use is the dinner bell. And who stays behind is a social negotiation no designer has to write.</p>
+        <div class="qs">
+          <span class="qlabel">Questions for you</span>
+          <ol>
+            <li>The volunteer mechanic: fun tension, or just stressful?</li>
+            <li>Does the wholesome-skin killer land as funny-scary, or defang the horror?</li>
+          </ol>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<section>
+  <h2>Must-Have Heat Map</h2>
+  <div class="grid">
+    <div class="corner"></div>
+    <div class="colhead pp"><div class="name">Porch Pirates</div><div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.14em">PP</div><div class="ttp">TTP · 4–6 WKS</div></div>
+    <div class="colhead sh"><div class="name">Shear</div><div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.14em">SH</div><div class="ttp">TTP · 2 WKS</div></div>
+    <div class="colhead bo"><div class="name">Bounce</div><div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.14em">BO</div><div class="ttp">TTP · 1 WK</div></div>
+    <div class="colhead bad"><div class="name">After Dark</div><div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.14em">AD</div><div class="ttp">TTP · 3 WKS</div></div>
+
+    <div class="crit"><div class="cnum">C1</div><div class="cname">One-verb simplicity</div><div class="cdef">Say the game in one verb?</div></div>
+    <div class="cell g-MED" data-game="PP"><span class="grade">MED</span></div>
+    <div class="cell g-MED" data-game="SH"><span class="grade">MED</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-HIGHEST" data-game="AD"><span class="grade">HIGHEST</span></div>
+
+    <div class="crit"><div class="cnum">C2</div><div class="cname">Physics comedy</div><div class="cdef">Failure funny without scripting?</div></div>
+    <div class="cell g-HIGH" data-game="PP"><span class="grade">HIGH</span></div>
+    <div class="cell g-EXTREME" data-game="SH"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C3</div><div class="cname">Voice as mechanic</div><div class="cdef">Does silence or distance cost you?</div></div>
+    <div class="cell g-HIGHEST" data-game="PP"><span class="grade">HIGHEST</span></div>
+    <div class="cell g-MED" data-game="SH"><span class="grade">MED</span></div>
+    <div class="cell g-HIGHEST" data-game="BO"><span class="grade">HIGHEST</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C4</div><div class="cname">Friend-dependency</div><div class="cdef">Fate rides on a friend?</div></div>
+    <div class="cell g-EXTREME" data-game="PP"><span class="grade">EXTREME</span></div>
+    <div class="cell g-MED" data-game="SH"><span class="grade">MED</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C5</div><div class="cname">Pressure curve</div><div class="cdef">Minute 25 worse than minute 5?</div></div>
+    <div class="cell g-HIGHEST" data-game="PP"><span class="grade">HIGHEST</span></div>
+    <div class="cell g-LOW" data-game="SH"><span class="grade">LOW</span></div>
+    <div class="cell g-MED" data-game="BO"><span class="grade">MED</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C6</div><div class="cname">Clippability</div><div class="cdef">15-second clip sells it?</div></div>
+    <div class="cell g-EXTREME" data-game="PP"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="SH"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C7</div><div class="cname">Instant recognition</div><div class="cdef">Zero explanation needed?</div></div>
+    <div class="cell g-HIGHEST" data-game="PP"><span class="grade">HIGHEST</span></div>
+    <div class="cell g-HIGH" data-game="SH"><span class="grade">HIGH</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-EXTREME" data-game="AD"><span class="grade">EXTREME</span></div>
+
+    <div class="crit"><div class="cnum">C8</div><div class="cname">Tiny-team scope</div><div class="cdef">Part-time contractors can build it?</div></div>
+    <div class="cell g-MED" data-game="PP"><span class="grade">MED</span></div>
+    <div class="cell g-HIGH" data-game="SH"><span class="grade">HIGH</span></div>
+    <div class="cell g-EXTREME" data-game="BO"><span class="grade">EXTREME</span></div>
+    <div class="cell g-MED" data-game="AD"><span class="grade">MED</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Time To Prototype — the one question each build must answer</h2>
+  <div class="ttpgrid">
+    <div class="ttpcard bo">
+      <div class="lbl">Bounce</div>
+      <div class="big">1 week</div>
+      <div class="q">Does the launch feel good? Two ragdolls, one blob, water. If testers laugh with zero content, greenlight. Gates both Bounce renditions.</div>
+    </div>
+    <div class="ttpcard sh">
+      <div class="lbl">Shear</div>
+      <div class="big">2 weeks</div>
+      <div class="q">Are the sheep funny? One field, three animals with resist behaviors, one shear tool.</div>
+    </div>
+    <div class="ttpcard bad">
+      <div class="lbl">After Dark</div>
+      <div class="big">3 weeks</div>
+      <div class="q">Does a launch under pursuit create panic-then-laughter? Blob test plus one dumb chaser and a night state.</div>
+    </div>
+    <div class="ttpcard pp">
+      <div class="lbl">Porch Pirates</div>
+      <div class="big">4–6 wks</div>
+      <div class="q">Does the reveal-and-chase create real panic? Roles, transformation and the shanty must exist before the fun is testable.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Enhancement Paths</h2>
+  <div class="enhgrid">
+    <div class="enh bo">
+      <h3>Bounce</h3>
+      <ul>
+        <li><b>Leapfrog traversal</b> — chain blobs across the lake; one flop strands the team</li>
+        <li><b>Mid-air ragdoll steering</b> — flail, reach, grab; no QTE prompts</li>
+        <li><b>Solo slingshot flip</b> — launch dummies and the flamingo at targets</li>
+        <li><b>Hazards as geography</b> — croc line, piranha shallows; arc over them, not events</li>
+        <li><b>HORSE mode</b> — call your shot; loser wears the towel cape</li>
+      </ul>
+    </div>
+    <div class="enh bad">
+      <h3>After Dark</h3>
+      <ul>
+        <li><b>Day/night structure</b> — days are the sandbox and tutorial; nights are survival</li>
+        <li><b>Projectile roster</b> — heavy camper cannonball, skinny-kid glider, floatie-kid water-skipper</li>
+        <li><b>Camp dog launcher</b> — solo nights: whistle and the dog jumps… unless a duck</li>
+        <li><b>The volunteer problem</b> — the launcher stays behind; the group decides who</li>
+        <li><b>Guard rail</b> — day is Angry Birds, night is Lethal Company; keep night thin</li>
+      </ul>
+    </div>
+    <div class="enh sh">
+      <h3>Shear</h3>
+      <ul>
+        <li><b>Collapse the chain</b> — automate machine and shelves; keep friction in the animals</li>
+        <li><b>Escalating weirdness</b> — angrier rams, a llama with a grudge, an emu incursion</li>
+        <li><b>Wool overgrowth</b> — unsheared animals become rolling boulders</li>
+        <li><b>Customers in the sandbox</b> — spooked, spat-on NPCs pay differently</li>
+        <li><b>Wear what you make</b> — the shop is the wardrobe</li>
+      </ul>
+    </div>
+    <div class="enh pp">
+      <h3>Porch Pirates</h3>
+      <ul>
+        <li><b>Cosmetics on the pirate form</b> — spend where the camera lives: the chase</li>
+        <li><b>Daily map rotation</b> — the cheap replay trick PEAK proved</li>
+        <li><b>Built-in clip capture</b> — auto-record the reveal; the clip is the marketing</li>
+        <li><b>Deterrent sandbox</b> — glitter bombs, sprinklers, decoys</li>
+        <li><b>HOA drama tools</b> — accusation emotes, petty fines, a gavel</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="verdict">
+  <b>The read:</b> Bounce and After Dark are the same bet at two scopes — the week-one blob test gates both. After Dark trades scope for an Extreme pressure curve, solo viability, and the strongest hook of the four. Shear has the best raw comedy and the weakest structure; Porch Pirates has the deepest hooks at the highest cost. Rational order: blob test → day-only vs day/night → Shear → Porch Pirates. <b>What helps most:</b> which of these you'd actually boot with your group on a Friday night — and which you'd skip, and why.
+</div>
+
+<footer>GRADES ARE JUDGMENT CALLS · PRE-PROTOTYPE · HAPPY MANIC LLC</footer>
+
+</div>
+
+<script>
+(function(){
+  var VISITOR_HASH = "c404f9b9d9c9352e3b6923bee8f73b1f61bd9dddb38c8f5d7e9d9591f779f4aa";
+  var ADMIN_HASH   = "9c1ed3d888dbb684e44f2e54d6efe33b161192220a8aa5a98ef206f071a14f57";
+  var LOG_KEY = "visit-log";
+
+  function sha256hex(str){
+    var data = new TextEncoder().encode(str);
+    return crypto.subtle.digest("SHA-256", data).then(function(buf){
+      return Array.from(new Uint8Array(buf)).map(function(b){
+        return b.toString(16).padStart(2,"0");
+      }).join("");
+    });
+  }
+
+  function hasStorage(){
+    return (typeof window.storage !== "undefined" && window.storage && typeof window.storage.get === "function");
+  }
+
+  async function logVisit(name){
+    if(!hasStorage()) return false;
+    var log = [];
+    try{
+      var res = await window.storage.get(LOG_KEY, true);
+      if(res && res.value) log = JSON.parse(res.value);
+    }catch(e){ /* key doesn't exist yet */ }
+    log.push({ name: name, ts: new Date().toISOString() });
+    try{
+      await window.storage.set(LOG_KEY, JSON.stringify(log), true);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  async function showAdminLog(){
+    document.getElementById("gate").style.display = "none";
+    var view = document.getElementById("adminlog");
+    view.style.display = "block";
+    var body = document.getElementById("logbody");
+    if(!hasStorage()){
+      body.innerHTML = "<tr><td colspan='2'>Log unavailable — logging only works when this page is opened as a Claude artifact link.</td></tr>";
+      return;
+    }
+    try{
+      var res = await window.storage.get(LOG_KEY, true);
+      var log = (res && res.value) ? JSON.parse(res.value) : [];
+      if(log.length === 0){
+        body.innerHTML = "<tr><td colspan='2'>No visitors yet.</td></tr>";
+        return;
+      }
+      log.reverse();
+      body.innerHTML = log.map(function(v){
+        var d = new Date(v.ts);
+        var name = String(v.name || "(no name)").replace(/[<>&]/g, "");
+        return "<tr><td>" + name + "</td><td>" + d.toLocaleString() + "</td></tr>";
+      }).join("");
+    }catch(e){
+      body.innerHTML = "<tr><td colspan='2'>No visitors yet.</td></tr>";
+    }
+  }
+
+  async function tryEnter(){
+    var name = document.getElementById("vname").value.trim();
+    var pass = document.getElementById("vpass").value;
+    var err = document.getElementById("gateerr");
+    err.textContent = "";
+    if(!pass){ err.textContent = "Enter the password."; return; }
+
+    var h;
+    try{ h = await sha256hex(pass); }
+    catch(e){ err.textContent = "This browser can't verify the password (needs a secure context)."; return; }
+
+    if(h === ADMIN_HASH){ showAdminLog(); return; }
+
+    if(h === VISITOR_HASH){
+      if(!name){ err.textContent = "Add your name so Joe knows who stopped by."; return; }
+      document.getElementById("enterbtn").textContent = "Opening…";
+      await logVisit(name);
+      document.getElementById("gate").style.display = "none";
+      document.getElementById("content").style.display = "block";
+      return;
+    }
+    err.textContent = "Wrong password.";
+  }
+
+  document.getElementById("enterbtn").addEventListener("click", tryEnter);
+  document.getElementById("vpass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryEnter(); });
+  document.getElementById("vname").addEventListener("keydown", function(e){ if(e.key === "Enter") tryEnter(); });
+})();
+</script>
+
+</body>
+</html>
